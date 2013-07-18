@@ -1,2 +1,3 @@
 testing_tool/target/*
 transaction_client/TransactionClient.jar
+*.nt
