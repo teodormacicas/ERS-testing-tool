@@ -27,6 +27,10 @@ public class Client extends Machine
     private int operationNum;
     private int transRetrials;
 
+    private int diffE; 
+    private int diffPperE;
+    private int diffVperP;
+    
     private double restartCond;
     private int timeoutSec;
     
@@ -294,6 +298,54 @@ public class Client extends Machine
      */
     public int getLastLogModification() { 
         return this.lastLogAccessSec;
+    }
+    
+    /**
+     * 
+     * @param diffE 
+     */
+    public void setDiffE(int diffE) { 
+        this.diffE = diffE;
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public int getDiffE() {
+        return this.diffE;
+    }
+    
+    /**
+     * 
+     * @param diffPperE 
+     */
+    public void setDiffPperE(int diffPperE) { 
+        this.diffPperE = diffPperE;
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public int getDiffPperE() {
+        return this.diffPperE;
+    }
+    
+    /**
+     * 
+     * @param diffVperE 
+     */
+    public void setDiffVperP(int diffVperE) { 
+        this.diffVperP = diffVperE;
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public int getDiffVperP() {
+        return this.diffVperP;
     }
     
     /**

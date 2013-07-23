@@ -3,10 +3,12 @@ package edu.ch.unifr.diuf.testing_tool;
 
 public class TestParams 
 {
+    public int numClients;
     public String testId;
     
     private String testServerGraphName;
     private int testServerGraphReset;
+    private int testServerGraphSnaphshot;
     private String testServerReadCons; 
     private String testServerWriteCons; 
     private String testServerTransLockingGran; 
@@ -21,20 +23,27 @@ public class TestParams
     private int testOperationNum;
     private int testTransRetrials;
 
-    public TestParams(String graphName, int graphReset, String readCons, 
-            String writeCons, String transLockGran, int replFactor,
-            String inputFilename, int num, int threadNum, int warmupPer, 
-            int runningPer, int operType, int operNum, int transRetrials, String testId) {
+    // number of different entities, properties per entity and values per property
+    private int testDiffEnt;
+    private int testDiffPropPerEnt; 
+    private int testDiffValuesPerProf;
+    
+    public TestParams(int numClients, String graphName, int graphReset, 
+            int graphSnapshot, String readCons, String writeCons, String transLockGran, int replFactor,
+            int num, int threadNum, int warmupPer, int runningPer, int operType, int operNum, int transRetrials, 
+            String testId, int diffEnt, int diffPropPerEnt, int diffValuesPerProp) {
+        this.numClients = numClients;
         // server related params
         this.testServerGraphName = graphName;
         this.testServerGraphReset = graphReset;
+        this.testServerGraphSnaphshot = graphSnapshot;
         this.testServerReadCons = readCons; 
         this.testServerWriteCons = writeCons;
         this.testServerTransLockingGran = transLockGran;
         this.testServerReplicationFactor = replFactor;
         
         // client related params 
-        this.testInputFilename = inputFilename;
+        //this.testInputFilename = inputFilename;
         this.testNum = num;
         this.testThreadNumber = threadNum;
         this.testWarmupPer = warmupPer;
@@ -43,6 +52,10 @@ public class TestParams
         this.testOperationNum = operNum;
         this.testTransRetrials = transRetrials;
         this.testId = testId;
+        
+        this.testDiffEnt = diffEnt; 
+        this.testDiffPropPerEnt = diffPropPerEnt;
+        this.testDiffValuesPerProf = diffValuesPerProp;
     }
 
     public String getTestServerGraphName() { 
@@ -59,6 +72,10 @@ public class TestParams
     
     public void setTestServerGraphReset(int reset) { 
         this.testServerGraphReset = reset;
+    }
+    
+    public int getGraphSnapshot() { 
+        return this.testServerGraphSnaphshot;
     }
     
     public String getTestReadCons() { 
@@ -81,9 +98,9 @@ public class TestParams
         return this.testTransRetrials;
     }
     
-    public String getTestInputFilename() {
+    /*public String getTestInputFilename() {
         return this.testInputFilename;
-    }
+    }*/
 
     public int getTestNum() {
         return testNum;
@@ -113,15 +130,33 @@ public class TestParams
         return this.testThreadNumber;
     }
 
+    public int getDiffEnt() { 
+        return this.testDiffEnt;
+    }
+    
+    public int getDiffPropPerEnt() { 
+        return this.testDiffPropPerEnt;
+    }
+   
+    public int getDiffValuesPerProp() { 
+        return this.testDiffValuesPerProf;
+    }
+    
+    private double getProbabilityOfConflicts() { 
+        return ((getTestThreadNum()+0.0)*numClients)/
+                (testDiffEnt*testDiffPropPerEnt*testDiffValuesPerProf)*100;
+    }
+    
     public String toString() { 
         StringBuilder sb = new StringBuilder();
         sb.append("\tSERVER PARAMS: ").append(testServerGraphName).append(" ");
-        sb.append(testServerGraphReset).append(" ").append(testServerReadCons);
+        sb.append(testServerGraphReset).append(" ");
+        sb.append(testServerGraphSnaphshot).append(" ").append(testServerReadCons);
         sb.append(" ").append(testServerWriteCons).append(" ").append(testServerTransLockingGran);
         sb.append(" ").append(testServerReplicationFactor).append("\n");
         
         sb.append("\tTEST PARAMS: \n");
-        sb.append("\t\tinput filename: ").append(testInputFilename).append("\n");
+        //sb.append("\t\tinput filename: ").append(testInputFilename).append("\n");
         sb.append("\t\trun steps: ").append(testNum).append("\n");
         sb.append("\t\tthread num per client: ").append(testThreadNumber).append("\n");
         sb.append("\t\twarmup period sec: ").append(testWarmupPer).append("\n");
@@ -129,6 +164,10 @@ public class TestParams
         sb.append("\t\toperation type: ").append(testOperationType).append("\n");
         sb.append("\t\tnum oper per trans: ").append(testOperationNum).append("\n");
         sb.append("\t\ttrans num of retrials: ").append(testRunningPer).append("\n");
+        sb.append("\t\tnum of different entities: ").append(testDiffEnt).append("\n");
+        sb.append("\t\tnum of different prop per ent: ").append(testDiffPropPerEnt).append("\n");
+        sb.append("\t\tnum of different values per prop: ").append(testDiffValuesPerProf).append("\n");
+        sb.append("\t\tPROBABILITY of conflicts (%): ").append(getProbabilityOfConflicts()).append("\n");
         return sb.toString();
     }
     

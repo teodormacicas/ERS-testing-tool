@@ -150,22 +150,25 @@ public class Coordinator
                 
                 // set client related params
                 for(int j = 0; j < mm.getClientsNum(); j++) {
-                    mm.getClientNo(j).setInputFilename(test.getTestInputFilename());
+                    //mm.getClientNo(j).setInputFilename(test.getTestInputFilename());
                     mm.getClientNo(j).setNoThreads(test.getTestThreadNum());
                     mm.getClientNo(j).setWarmupPeriod(test.getTestWarmupPer());
                     mm.getClientNo(j).setRunningPeriod(test.getTestRunningPer());
                     mm.getClientNo(j).setOperationType(test.getTestOperationType());
                     mm.getClientNo(j).setOperationNum(test.getTestOperationNum());
                     mm.getClientNo(j).setTransRetrials(test.getTestTransRetrials());
+                    mm.getClientNo(j).setDiffE(test.getDiffEnt());
+                    mm.getClientNo(j).setDiffPperE(test.getDiffPropPerEnt());
+                    mm.getClientNo(j).setDiffVperP(test.getDiffValuesPerProp());
                 }
-                StringBuilder sbTest = new StringBuilder("[INFO] Test with parameters:");
+                StringBuilder sbTest = new StringBuilder("[INFO] Test with parameters: ");
                 
                 
-                sbTest.append(test.getTestServerGraphName()).append(" ").append(test.getTestServerGraphReset()).
+                sbTest.append(test.getTestServerGraphName()).append(" ").append(test.getTestServerGraphReset()).append(" ").
                        append(test.getTestReadCons()).append(" ").append(test.getTestWriteCons()).append(" ").
                        append(test.getTransLockGran()).append(" ").append(test.getReplicationFactor()).append(" ").
                        append(test.getTestThreadNum()).append(" ").append(test.getTestRunningPer()).append(" ").
-                       append(test.getTestWarmupPer()).append(" ").append(test.getTestInputFilename()).append(" "). 
+                       append(test.getTestWarmupPer()).append(" ").
                        append(test.getTestOperationType()).append(" ").append(test.getTestOperationNum()).append(" ").
                        append(test.getTestTransRetrials());                        
                 System.out.println(sbTest.toString());

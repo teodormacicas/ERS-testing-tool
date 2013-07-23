@@ -176,6 +176,7 @@ public class SSHCommands
             String escapedGraph = server.getGraph().replace("<", "\\<").replace(">", "\\>");
             sb.append(escapedGraph).append(" ");
             sb.append(server.getGraphReset()).append(" "); 
+            sb.append(server.getGraphSnapshot()).append(" "); 
             sb.append(server.getReadCons()).append(" ");
             sb.append(server.getWriteCons()).append(" ");
             sb.append(server.getTransLockGran()).append(" ");
@@ -191,9 +192,13 @@ public class SSHCommands
             sb.append("yes ");
             sb.append(client.getWorkingDirectory()).append(" "); 
             sb.append(client.getUUID()).append(" "); 
-            if( client.getId() == 0 ) { 
+            sb.append(client.getDiffE()).append(" ");
+            sb.append(client.getDiffPperE()).append(" ");
+            sb.append(client.getDiffVperP()).append(" ");
+            if( client.getId() == 0 ) 
                 sb.append("yes ");
-            }
+            else 
+                sb.append("no ");
             // output to a log file 
             sb.append(" &> ");
             sb.append(Utils.getClientLogRemoteFilename(client));

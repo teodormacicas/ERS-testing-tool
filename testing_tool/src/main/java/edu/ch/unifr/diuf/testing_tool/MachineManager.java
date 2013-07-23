@@ -568,13 +568,14 @@ public class MachineManager
                         + " is null or empty.");
             }
             int serverGraphReset = testConfig.getInt("server.graph.reset", 0);
+            int serverGraphSnapshot = testConfig.getInt("server.graph.snapshot", 0);
             String serverReadCons = testConfig.getString("server.read.consistency", "one" );
             String serverWriteCons = testConfig.getString("server.write.consistency", "one" );
             String serverTransLockingGran = testConfig.getString("server.trans.locking.granularity", "epv");
             int serverReplicationFactor = testConfig.getInt("server.replication.factor", 1);
             
             // client related params
-            String testInputFilename = testConfig.getString("test.input.filename");
+            //String testInputFilename = testConfig.getString("test.input.filename");
             int testRepeat = testConfig.getInt("test.num", 1);
             int testThreadNum = testConfig.getInt("test.thread.num", 1);
             int testWarmupPer = testConfig.getInt("test.period.warmup", 1);
@@ -583,10 +584,16 @@ public class MachineManager
             int testOperNum = testConfig.getInt("test.operation.num", 1);
             int testTransRetrials = testConfig.getInt("test.transaction.retrials", 5);
             
-            tests.add(new TestParams(serverGraphName, serverGraphReset, serverReadCons,
+            int testDiffEnt = testConfig.getInt("test.num.diff.e", 10);
+            int testDiffPropPerEnt = testConfig.getInt("test.num.diff.p.per.e", 5);
+            int testDiffValuePerProp = testConfig.getInt("test.num.diff.v.per.p", 1);
+            
+            tests.add(new TestParams(clients.size(), serverGraphName, serverGraphReset, 
+                    serverGraphSnapshot, serverReadCons,
                     serverWriteCons, serverTransLockingGran, serverReplicationFactor,
-                    testInputFilename, testRepeat, testThreadNum, testWarmupPer, testRunningPer, 
-                    testOperType, testOperNum, testTransRetrials, nameWithExtension));
+                    testRepeat, testThreadNum, testWarmupPer, testRunningPer, 
+                    testOperType, testOperNum, testTransRetrials, nameWithExtension,
+                    testDiffEnt, testDiffPropPerEnt, testDiffValuePerProp));
         }
     }
     

@@ -1,13 +1,10 @@
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Random;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.FileNotFoundException;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.io.DataOutputStream;
@@ -16,7 +13,7 @@ import java.net.MalformedURLException;
 
 
 import org.semanticweb.yars.nx.Node;
-import org.semanticweb.yars.nx.parser.NxParser;
+import org.semanticweb.yars.nx.Variable;
 
 // this must sent random transactions to the server
 public class TransactionClient
@@ -25,6 +22,7 @@ public class TransactionClient
         private String server_http_address;
         private String graph_name;
         private int reset_flag;
+        private int snapshot_flag;
         private String read_cons;
         private String write_cons;
         private String trans_lock_gran;
@@ -33,7 +31,6 @@ public class TransactionClient
         private int time_run_per_th;
         // after this timeout the results are gathered 
         private int warmup_period;
-        private String input_nt_file;
         private int operation_type;
         private int no_operations_per_transaction;
         private int no_retrials;
@@ -41,6 +38,10 @@ public class TransactionClient
         private String operation_name;
         private String working_dir;
         private String client_id;
+        
+        private int numDiffEnt; 
+        private int numDiffPropPerEnt; 
+        private int numDiffValuePerProp;
    
 	private ArrayList<Node[]> input_triples;
 	private Thread[] client_threads;
@@ -117,36 +118,28 @@ public class TransactionClient
                         this.start_collection_res_time = System.currentTimeMillis();
                 }
 
-		private String createAnUpdate(Integer linkFlag) { 
-			int randomInt = random_gen.nextInt(this.size);
-			Node[] random_node = input_triples.get(randomInt); 
-			// create one update here
-			StringBuilder sb = new StringBuilder(); 
-		         if( linkFlag != 0 ) 
-		            sb.append("update_link(");
-		         else
-   			sb.append("update(");
-			sb.append("<"+random_node[0]+">").append(",");
-			sb.append("<"+random_node[1]+">").append(",");
-			// new value
-			//sb.append("<"+random_node[2]+">").append(",");
-			sb.append("<NEW_"+random_node[2]+">").append(",");
-			sb.append(graph_name);
-		         sb.append(",");
-			// old value of the update
-			sb.append("<"+random_node[2]+">").append(");");
-			return sb.toString();
-		}
-
+                private Node[] getRandomNode() { 
+                    int randomInt;
+                    Node[] n = new Node[3];
+                    randomInt = random_gen.nextInt(numDiffEnt);
+                    n[0] = new Variable("eeeeeeeeeeeeeeeeeeeeee"+randomInt);
+                    randomInt = random_gen.nextInt(numDiffPropPerEnt);
+                    n[1] = new Variable("pppppppppppppppppppppp"+randomInt);
+                    randomInt = random_gen.nextInt(numDiffValuePerProp);
+                    n[2] = new Variable("vvvvvvvvvvvvvvvvvvvvvv"+randomInt);
+                    //return input_triples.get(randomInt); 
+                    return n;
+                }
+                
                 private String createAnInsert(Integer linkFlag) {
-			int randomInt = random_gen.nextInt(this.size);
-			Node[] random_node = input_triples.get(randomInt); 
+			//Node[] random_node = input_triples.get(randomInt); 
+                        Node[] random_node = getRandomNode(); 
 			// create one insert ere
 			StringBuilder sb = new StringBuilder(); 
         		 if( linkFlag != 0 ) 
 		            sb.append("insert_link(");
 		         else
-   			sb.append("insert(");
+                            sb.append("insert(");
 			sb.append("<"+random_node[0]+">").append(",");
 			sb.append("<"+random_node[1]+">").append(",");
 			// new value
@@ -154,26 +147,44 @@ public class TransactionClient
 			sb.append(graph_name).append(");");
 			return sb.toString();
 		}
+                
+		private String createAnUpdate(Integer linkFlag) { 
+                        Node[] random_node = getRandomNode();
+			// create one update here
+			StringBuilder sb = new StringBuilder(); 
+		         if( linkFlag != 0 ) 
+		            sb.append("update_link(");
+		         else
+                            sb.append("update(");
+			sb.append("<"+random_node[0]+">").append(",");
+			sb.append("<"+random_node[1]+">").append(",");
+			// new value
+			//sb.append("<"+random_node[2]+">").append(",");
+			sb.append("<"+random_node[2]+">").append(",");
+			sb.append(graph_name);
+		         sb.append(",");
+			// old value of the update
+			sb.append("<"+random_node[2]+">").append(");");
+			return sb.toString();
+		}
 
                 private String createADelete(Integer linkFlag) {
-                        int randomInt = random_gen.nextInt(this.size);
-                        Node[] random_node = input_triples.get(randomInt);
+                        Node[] random_node = getRandomNode();
                         // create one insert ere
                         StringBuilder sb = new StringBuilder();
                         if( linkFlag != 0 )
                             sb.append("delete_link(");
                         else
                                 sb.append("delete(");
-                                sb.append("<"+random_node[0]+">").append(",");
-                                sb.append("<"+random_node[1]+">").append(",");
-                                sb.append("<"+random_node[2]+">").append(",");
-                                sb.append(graph_name).append(");");
+                        sb.append("<"+random_node[0]+">").append(",");
+                        sb.append("<"+random_node[1]+">").append(",");
+                        sb.append("<"+random_node[2]+">").append(",");
+                        sb.append(graph_name).append(");");
                         return sb.toString();
                 }
 
                 private String createAnCopyShallow(String graph_src, String graph_dest) {
-                        int randomInt = random_gen.nextInt(this.size);
-                        Node[] random_node = input_triples.get(randomInt);
+                        Node[] random_node = getRandomNode();
                         // create one shallow copy here
                         StringBuilder sb = new StringBuilder();
                         sb.append("shallow_clone(");
@@ -187,8 +198,7 @@ public class TransactionClient
                 }
 
                 private String createAnCopyDeep(String graph_src, String graph_dest) {
-			int randomInt = random_gen.nextInt(this.size);
-			Node[] random_node = input_triples.get(randomInt); 
+			Node[] random_node = getRandomNode();
 			// create one deep copy 
 			StringBuilder sb = new StringBuilder(); 
 			sb.append("deep_clone(");
@@ -202,8 +212,7 @@ public class TransactionClient
 		}
 
                 private String createDeleteEntity(String graph_src) {
-			int randomInt = random_gen.nextInt(this.size);
-			Node[] random_node = input_triples.get(randomInt); 
+			Node[] random_node = getRandomNode();
 			// create one deep copy 
 			StringBuilder sb = new StringBuilder(); 
 			sb.append("delete_all(");
@@ -310,69 +319,77 @@ public class TransactionClient
 		}
 	}
 
-	public TransactionClient(String sta, int noth, int time_per_thread,
-                String input_filename, Integer operation_type, String graph, 
-                int reset_flag) {
-		this.server_http_address = sta;
-		this.no_threads = noth;
-		this.time_run_per_th = time_per_thread;
-		this.input_filename = input_filename;
-                this.operation_type = operation_type;
-		this.graph_name = graph;
-		this.input_triples = new ArrayList<Node[]>();
-                this.reset_flag = reset_flag;
-		init();
-	}
+        public TransactionClient() {
+            this.input_triples = new ArrayList<Node[]>();
+        }
 	
 	// read the input file and populate the input_triples structure
-	private void init() { 
+	public void init() { 
 		this.client_threads = new ClientThread[this.no_threads];
-		File input_f = new File(this.input_filename); 
+		
+                /*File input_f = new File(this.input_filename); 
 		if( ! input_f.exists() ) { 
 			System.err.println("Input file " + input_filename + " does not exist!");
 			System.exit(2); 
 		}
 		// load the triples file in memory
 		try { 
-			FileInputStream fis = new FileInputStream(input_f);
-        	Iterator<Node[]> nxp = new NxParser(fis);
-                while (nxp.hasNext()) {
-                        boolean skip = false;
-                        Node[] nx = nxp.next();
-				// filter here the triples that contain 'white_spaces' in one of the param
-				// reason: our primitive transaction engine do not accept this 
-				for( int j=0; j<nx.length; ++j ) { 
-					String n = nx[j].toString(); 
-					if( n.contains(" ") ) {
-						skip = true;
-						break;
-					}
-				}
-				if( skip ) 
-					continue;
-				this.input_triples.add(nx);
-			}
+                    FileInputStream fis = new FileInputStream(input_f);
+                    Iterator<Node[]> nxp = new NxParser(fis);
+                    while (nxp.hasNext()) {
+                            boolean skip = false;
+                            Node[] nx = nxp.next();
+                            // filter here the triples that contain 'white_spaces' in one of the param
+                            // reason: our primitive transaction engine do not accept this 
+                            for( int j=0; j<nx.length; ++j ) { 
+                                    String n = nx[j].toString(); 
+                                    if( n.contains(" ") ) {
+                                            skip = true;
+                                            break;
+                                    }
+                            }
+                            if( skip ) 
+                                    continue;
+                            this.input_triples.add(nx);
+                    }
 		} catch( FileNotFoundException ex) { 
 			ex.printStackTrace(); 
 			System.exit(3); 
-		}
+		}*/
 	}
 	
         public void dbinit() {
             // change consistency
             changeReadWriteConsistency(read_cons, write_cons);
-            // reset the graph if needed
-            if( reset_flag == 1 ) {
+            // change transaction locking granularity 
+            changeTransactionLockingGranularity(trans_lock_gran);
+            // also change replication facotr 
+            changeReplicationFactor(repl_factor);
+            
+            // reset the graph if needed (only for insert)
+            if( reset_flag == 1 && operation_type == 0 ) {
                     System.out.println("Delete and (re)create the graph " + graph_name);
                     deleteGraph(graph_name);
                     createNewGraph(graph_name);
             }
+            // create a snapshot if not insert (do not forget to restore it)
+            if( snapshot_flag == 1 && operation_type != 0 ) {
+                
+            }
         }
         
-	public void startThreads(int operation_type, int no_oper, int no_retrials) {
+        public void dbclear() { 
+            // restore the snapshot
+            if( snapshot_flag == 1 && operation_type != 0 ) {
+                
+            }
+        }
+        
+	public void startThreads() {
 		for(int i=0; i<this.no_threads; ++i)
 			client_threads[i] = new ClientThread(
-                                operation_type, no_oper, no_retrials);
+                                operation_type, no_operations_per_transaction, 
+                                no_retrials);
 
 		for(int i=0; i<this.no_threads; ++i)
 			client_threads[i].start();
@@ -483,6 +500,39 @@ public class TransactionClient
                 }
         }
         
+        public void changeTransactionLockingGranularity(String transLockGran) {
+                HttpURLConnection connection;
+                String urlParameters = "trans_lock_gran="+transLockGran;
+                try {
+                        URL url = new URL(server_http_address+SERVER_SETUP_SERVLET);
+                        connection = (HttpURLConnection) url.openConnection();
+                        connection.setDoOutput(true);
+                        connection.setDoInput(true);
+                        connection.setInstanceFollowRedirects(false);
+                        connection.setRequestMethod("POST");
+                        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                        connection.setRequestProperty("charset", "utf-8");
+                        connection.setUseCaches (false);
+                        connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+                        
+                        DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
+                        wr.writeBytes(urlParameters);
+                        wr.flush();
+                        wr.close();
+
+                        String line;
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        line = reader.readLine();
+                        System.out.println("Change read and write consistency levels: "+line);
+                       
+                        connection.disconnect();
+                } catch( MalformedURLException ex ) {
+                        ex.printStackTrace();
+                } catch( IOException ex ) {
+                        ex.printStackTrace();
+                }
+        }
+
         public void changeReadWriteConsistency(String readCons, String writeCons) {
                 HttpURLConnection connection;
                 String urlParameters = "read_cons="+readCons+"&write_cons="+writeCons;
@@ -515,7 +565,40 @@ public class TransactionClient
                         ex.printStackTrace();
                 }
         }
+        
+        public void changeReplicationFactor(int replFactor) {
+                HttpURLConnection connection;
+                String urlParameters = "repl_factor="+replFactor;
+                try {
+                        URL url = new URL(server_http_address+SERVER_SETUP_SERVLET);
+                        connection = (HttpURLConnection) url.openConnection();
+                        connection.setDoOutput(true);
+                        connection.setDoInput(true);
+                        connection.setInstanceFollowRedirects(false);
+                        connection.setRequestMethod("POST");
+                        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                        connection.setRequestProperty("charset", "utf-8");
+                        connection.setUseCaches (false);
+                        connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+                        
+                        DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
+                        wr.writeBytes(urlParameters);
+                        wr.flush();
+                        wr.close();
 
+                        String line;
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        line = reader.readLine();
+                        System.out.println("Change read and write consistency levels: "+line);
+                       
+                        connection.disconnect();
+                } catch( MalformedURLException ex ) {
+                        ex.printStackTrace();
+                } catch( IOException ex ) {
+                        ex.printStackTrace();
+                }
+        }
+        
         private static String getOperationName(Integer operation_type) {
                 String operation_name;
                 switch( operation_type ) {
@@ -554,28 +637,32 @@ public class TransactionClient
         }
 
 	public static void main(String[] args) throws IOException, InterruptedException { 
-		if( args.length < 16 ) {
+		if( args.length < 20 ) {
 			System.err.println("Usage: \n" +
                                            "1. server http address \n"+
                                            "2. graph name \n" +
                                            "3. reset graph (0:do nothing, 1:delete&create)\n" +
-                                           "4. read consistency (one, two, three, quorum, all)\n" + 
-                                           "5. write consistency (one, two, three, quorum, all, any)\n" +
-                                           "6. transactional locking granularity (e, ep, epv)\n" + 
-                                           "7. replication factor \n"+
-					   "8. no of threads \n" +
-                                           "9. time to run per thread (sec) \n" +
-                                           "10. warm-up period (sec) \n" +
-					   "11. input nt file \n" +
-                                           "12. operation type (0:insert, 1:insert_link, 2:update, 3:update_link" +
+                                           "4. snashot graph (0:do nothing, 1:delete&create)\n" +
+                                           "5. read consistency (one, two, three, quorum, all)\n" + 
+                                           "6. write consistency (one, two, three, quorum, all, any)\n" +
+                                           "7. transactional locking granularity (e, ep, epv)\n" + 
+                                           "8. replication factor \n"+
+					   "9. no of threads \n" +
+                                           "10. time to run per thread (sec) \n" +
+                                           "11. warm-up period (sec) \n" +
+					   "12. input nt file \n" +
+                                           "13. operation type (0:insert, 1:insert_link, 2:update, 3:update_link" +
                                            ", 4:delete, 5:delete_link, 6:entity_shallow_copy, 7:entity_deep_copy," +
                                            " 8:entity_full_delete) \n" +
-                                           "13. number of operations to run per transaction \n" +
-                                           "14. number of retrials (if transaction conficts)\n" + 
-                                           "15. distributed mode flag (yes/no); NOTE: if yes, the following parameters are used\n" +
-                                           "16. working directory (needed to run remote ssh commands)\n" +
-                                           "17. client ID (also used by reomte ssh commands)\n" +
-                                           "18. INIT FLAG (at most 1client must use this flag; it resets consistency, graph and others)");
+                                           "14. number of operations to run per transaction \n" +
+                                           "15. number of retrials (if transaction conficts)\n" + 
+                                           "16. distributed mode flag (yes/no); NOTE: if yes, the following parameters are used\n" +
+                                           "17. working directory (needed to run remote ssh commands)\n" +
+                                           "18. client ID (also used by reomte ssh commands)\n" +
+                                           "19. number different entities \n" +
+                                           "20. number different properties per entity \n" +
+                                           "21. number different values per property \n" +
+                                           "22. INIT FLAG (at most 1client must use this flag; it resets consistency, graph and others)");
 			System.exit(1);
 		}
                 //IMPORTANT FOR TESTING TOOL; DO NOT DELETE!
@@ -588,74 +675,77 @@ public class TransactionClient
 			System.out.print(args[i] + " "); 
 		System.out.println("");
 
-		String server_http_address = args[0]; 
-                String graph_name = args[1];
-                int reset_flag = Integer.valueOf(args[2]);
-                String read_cons = args[3];
-                String write_cons = args[4];
-                String trans_lock_gran = args[5];
-                int repl_factor = Integer.valueOf(args[6]);
+                TransactionClient tc = new TransactionClient();
+		tc.server_http_address = args[0]; 
+                tc.graph_name = args[1];
+                tc.reset_flag = Integer.valueOf(args[2]);
+                tc.snapshot_flag = Integer.valueOf(args[3]);
                 
-		int no_threads =  ( Integer.valueOf(args[7]) < 1 ) ? 1 : Integer.valueOf(args[7]);
-		int time_run_per_th = ( Integer.valueOf(args[8]) < 1 ) ? 1 : Integer.valueOf(args[8]);
+                tc.read_cons = args[4];
+                tc.write_cons = args[5];
+                tc.trans_lock_gran = args[6];
+                tc.repl_factor = Integer.valueOf(args[7]);
+                
+		tc.no_threads =  ( Integer.valueOf(args[8]) < 1 ) ? 1 : Integer.valueOf(args[8]);
+		tc.time_run_per_th = ( Integer.valueOf(args[9]) < 1 ) ? 1 : Integer.valueOf(args[9]);
                 // after this timeout the results are gathered 
-                int warmup_period = Integer.valueOf(args[9]);
-		String input_nt_file = args[10];
+                tc.warmup_period = Integer.valueOf(args[10]);
+		//tc.input_filename = args[11];
 		
-                int operation_type = Integer.valueOf(args[11]);
-		int no_operations_per_transaction = ( Integer.valueOf(args[12]) < 1 ) ? 1 : Integer.valueOf(args[12]);
+                tc.operation_type = Integer.valueOf(args[12]);
+		tc.no_operations_per_transaction = ( Integer.valueOf(args[13]) < 1 ) ? 1 : Integer.valueOf(args[13]);
                 
-                int no_retrials = Integer.valueOf(args[13]);
-                String distr_flag = args[14]; 
-                String operation_name = getOperationName(operation_type);
-                if( operation_name == null ) {
+                tc.no_retrials = Integer.valueOf(args[14]);
+                tc.distr_flag = args[15]; 
+                tc.operation_name = getOperationName(tc.operation_type);
+                if( tc.operation_name == null ) {
                         System.out.println("[ERROR] Please pass a correct operation type. See the 'usage'!");
                         return;
                 }
-		System.out.println("Create transactions with " + no_operations_per_transaction + " " + operation_name + " per T");
+		System.out.println("Create transactions with " + tc.no_operations_per_transaction 
+                        + " " + tc.operation_name + " per T");
                 
-                String working_dir="";
-                String client_id="-1";
-                if( distr_flag !=null && ! distr_flag.isEmpty() && distr_flag.equals("yes") ) {
+                tc.working_dir="";
+                tc.client_id="-1";
+                if( tc.distr_flag !=null && ! tc.distr_flag.isEmpty() && tc.distr_flag.equals("yes") ) {
                     System.out.println("Distributed mode is on, thus use synch mechanism ... ");
-                    working_dir = args[15];
-                    client_id = args[16];
+                    tc.working_dir = args[16];
+                    tc.client_id = args[17];
                 }
+                tc.numDiffEnt = ( Integer.valueOf(args[18]) < 1 ) ? 1 : Integer.valueOf(args[18]);
+                tc.numDiffPropPerEnt = ( Integer.valueOf(args[19]) < 1 ) ? 1 : Integer.valueOf(args[19]);
+                tc.numDiffValuePerProp = ( Integer.valueOf(args[20]) < 1 ) ? 1 : Integer.valueOf(args[20]);
                 
-                boolean setup_server = false;
-                if( args[17] != null ) { 
-                    setup_server = true;
-                }
-                
-                // create and init the client 
-                TransactionClient tc = new TransactionClient(server_http_address, no_threads, time_run_per_th,
-                                                                input_nt_file, operation_type, graph_name, reset_flag);
-                if( setup_server ) {
+                tc.init();
+                // does this client initialize/setup the DB?
+                if( args[21] != null ) { 
                     tc.dbinit();
                 }
 
-                if( distr_flag !=null && ! distr_flag.isEmpty() && distr_flag.equals("yes") ) {
+                if( tc.distr_flag !=null && ! tc.distr_flag.isEmpty() && tc.distr_flag.equals("yes") ) {
                     // initializations are done, so create the local msg
-                    String ready_warmup_filename = working_dir+"/"+client_id+FILENAME_SUFFIX_READY_WARMUP;
+                    String ready_warmup_filename = tc.working_dir+"/"+tc.client_id+FILENAME_SUFFIX_READY_WARMUP;
                     new File(ready_warmup_filename).createNewFile();
                     System.out.println("Client ready for warmup and sending requests ...");
                 
                     // now, we wait until the coordinator creates another local file
-                    String read_to_start_filename = working_dir+"/"+client_id+FILENAME_SUFFIX_START_SENDING_REQUESTS;
+                    String read_to_start_filename = tc.working_dir+"/"+tc.client_id+
+                            FILENAME_SUFFIX_START_SENDING_REQUESTS;
                     while( ! new File(read_to_start_filename).exists() ) {
                         Thread.sleep(50);
                     }
-                    System.out.println("Warmup begins now and in " + warmup_period + "sec statistics will start to be gathered ...");
+                    System.out.println("Warmup begins now and in " + tc.warmup_period 
+                            + "sec statistics will start to be gathered ...");
                 }
                 
                 // start threads to send 'operation_type' transaction for no_op.. times
-		tc.startThreads(operation_type, no_operations_per_transaction, no_retrials);
+		tc.startThreads();
                 long start_time = 0;
                 // wait to warmup before signaling the other threads to go ahead
                 try {
-                        System.out.println("Threads have been started, but wait " + warmup_period
+                        System.out.println("Threads have been started, but wait " + tc.warmup_period
                                 + " seconds to warmup ... ");
-                        for( int i=0; i<warmup_period; ++i ) {
+                        for( int i=0; i<tc.warmup_period; ++i ) {
                             Thread.sleep(1000);
                             System.out.print("warmup ");
                         }
@@ -664,11 +754,12 @@ public class TransactionClient
                         tc.startCollectingResults();
                         start_time = System.currentTimeMillis();
                         // now wait the given period for the threads to run transactions before joining them
-                        System.out.println("Leave threads to send transactions for " + time_run_per_th + " seconds ... ");
-                        for( int i=0; i<time_run_per_th; i=i+5) {
-                            System.out.print((time_run_per_th-i)+"s ");
-                            if( i+5 > time_run_per_th ) 
-                                Thread.sleep(time_run_per_th-i * 1000);
+                        System.out.println("Leave threads to send transactions for " 
+                                + tc.time_run_per_th + " seconds ... ");
+                        for( int i=0; i<tc.time_run_per_th; i=i+5) {
+                            System.out.print((tc.time_run_per_th-i)+"s ");
+                            if( i+5 > tc.time_run_per_th ) 
+                                Thread.sleep(tc.time_run_per_th-i * 1000);
                             else
                                 Thread.sleep(i * 1000);
                         }
@@ -679,6 +770,10 @@ public class TransactionClient
                 System.out.println("\nStop threads and gather statistics ");
 		tc.joinThreads();
 
+                if( args[21] != null && args[21].equals("yes") ) { 
+                    tc.dbclear();
+                }
+                
 		long total_time = System.currentTimeMillis()-start_time;
                 int total_trans = tc.getTotalTransactionsSent();
 		double s_rate = tc.getSuccessfulRate(total_trans);
@@ -686,15 +781,20 @@ public class TransactionClient
 		int aborted = tc.getTotalAborted();
 
 		System.out.println("Time time needed for sending " + total_trans + " transactions " + total_time +"ms");
-		System.out.println(" ... " + no_operations_per_transaction + " no of " + operation_name + " ran per transaction ");
+		System.out.println(" ... " + tc.no_operations_per_transaction + " no of " + tc.operation_name + " ran per transaction ");
 		System.out.println(" ... with a successful rate of " + s_rate + "%   =>  transaction rate of " + ((double)tc.total_successful/total_time*1000) + "tx/sec" );
 		System.out.println(" ... " + conflicts + " total number of conflicts; 1 unit means one certain transaction was restarted");
 		System.out.println(" ... " + aborted + " total number of aborted transactions");
-		System.out.println(" ... after " + no_retrials + " of retrials a transaction was aborted!");
+		System.out.println(" ... after " + tc.no_retrials + " of retrials a transaction was aborted!");
                 
-                if( distr_flag !=null && ! distr_flag.isEmpty() && distr_flag.equals("yes") ) {
+                System.out.println();
+                System.out.println("Total time, total trans, conflicts, aborted, successful rate/sec, no retrials");
+                System.out.println(total_time + " " + total_trans + " " + conflicts + " " + aborted + " " +
+                        ((double)tc.total_successful/total_time*1000) + " "  + tc.no_retrials);
+                
+                if( tc.distr_flag !=null && ! tc.distr_flag.isEmpty() && tc.distr_flag.equals("yes") ) {
                     // as the threads are finished, signal it again with a new empty file
-                    String ready_filename = working_dir+"/"+client_id+FILENAME_SUFFIX_FINISHED;
+                    String ready_filename = tc.working_dir+"/"+tc.client_id+FILENAME_SUFFIX_FINISHED;
                     new File(ready_filename).createNewFile();
                 }
 	}

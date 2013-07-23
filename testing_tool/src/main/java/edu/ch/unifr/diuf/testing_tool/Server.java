@@ -17,6 +17,7 @@ public class Server extends Machine
      // each test will use one graph
      private String serverGraph;
      private int serverResetGraph;
+     private int serverSnapshotGraph;
      
      // if set to 'yes', in case of failure restartAttempts is tried 
      private String faultTolerant;
@@ -209,5 +210,21 @@ public class Server extends Machine
      */
     public int getReplFactor() { 
         return this.serverReplicationFactor;
+    }
+    
+    /**
+     * 
+     * @param snapshot 
+     */
+    public void setGraphSnapshot(int snapshot) { 
+        this.serverSnapshotGraph = snapshot;
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public int getGraphSnapshot() { 
+        return this.serverSnapshotGraph;
     }
 }
