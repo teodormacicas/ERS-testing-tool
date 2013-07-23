@@ -143,6 +143,10 @@ public class Coordinator
                 // set server related params
                 mm.getServer().setGraph(test.getTestServerGraphName());
                 mm.getServer().setGraphReset(test.getTestServerGraphReset());
+                mm.getServer().setReadCons(test.getTestReadCons());
+                mm.getServer().setWriteCons(test.getTestWriteCons());
+                mm.getServer().setTransLockGran(test.getTransLockGran());
+                mm.getServer().setReplFactor(test.getReplicationFactor());
                 
                 // set client related params
                 for(int j = 0; j < mm.getClientsNum(); j++) {
@@ -155,11 +159,15 @@ public class Coordinator
                     mm.getClientNo(j).setTransRetrials(test.getTestTransRetrials());
                 }
                 StringBuilder sbTest = new StringBuilder("[INFO] Test with parameters:");
-                sbTest.append(test.getTestThreadNum()).append(" ").append(test.getTestRunningPer()).
-                        append(" ").append(test.getTestWarmupPer()).append(" ").
-                        append(test.getTestInputFilename()).append(" ").append(test.getTestServerGraphName()).
-                        append(" ").append(test.getTestOperationType()).append(" ").append(test.getTestOperationNum()).
-                        append(" ").append(test.getTestServerGraphReset()).append(" ").append(test.getTestTransRetrials());                   
+                
+                
+                sbTest.append(test.getTestServerGraphName()).append(" ").append(test.getTestServerGraphReset()).
+                       append(test.getTestReadCons()).append(" ").append(test.getTestWriteCons()).append(" ").
+                       append(test.getTransLockGran()).append(" ").append(test.getReplicationFactor()).append(" ").
+                       append(test.getTestThreadNum()).append(" ").append(test.getTestRunningPer()).append(" ").
+                       append(test.getTestWarmupPer()).append(" ").append(test.getTestInputFilename()).append(" "). 
+                       append(test.getTestOperationType()).append(" ").append(test.getTestOperationNum()).append(" ").
+                       append(test.getTestTransRetrials());                        
                 System.out.println(sbTest.toString());
                 
                  // before starting the clients, lets check if the data inputfile exists remotely

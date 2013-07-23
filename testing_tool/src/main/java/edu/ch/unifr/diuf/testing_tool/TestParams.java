@@ -7,6 +7,10 @@ public class TestParams
     
     private String testServerGraphName;
     private int testServerGraphReset;
+    private String testServerReadCons; 
+    private String testServerWriteCons; 
+    private String testServerTransLockingGran; 
+    private int testServerReplicationFactor;
     
     private String testInputFilename;
     private int testNum;
@@ -17,11 +21,19 @@ public class TestParams
     private int testOperationNum;
     private int testTransRetrials;
 
-    public TestParams(String graphName, int graphReset, String inputFilename, 
-            int num, int threadNum, int warmupPer, int runningPer, int operType, 
-            int operNum, int transRetrials, String testId) {
+    public TestParams(String graphName, int graphReset, String readCons, 
+            String writeCons, String transLockGran, int replFactor,
+            String inputFilename, int num, int threadNum, int warmupPer, 
+            int runningPer, int operType, int operNum, int transRetrials, String testId) {
+        // server related params
         this.testServerGraphName = graphName;
         this.testServerGraphReset = graphReset;
+        this.testServerReadCons = readCons; 
+        this.testServerWriteCons = writeCons;
+        this.testServerTransLockingGran = transLockGran;
+        this.testServerReplicationFactor = replFactor;
+        
+        // client related params 
         this.testInputFilename = inputFilename;
         this.testNum = num;
         this.testThreadNumber = threadNum;
@@ -47,6 +59,26 @@ public class TestParams
     
     public void setTestServerGraphReset(int reset) { 
         this.testServerGraphReset = reset;
+    }
+    
+    public String getTestReadCons() { 
+        return this.testServerReadCons;
+    }
+    
+    public String getTestWriteCons() { 
+        return this.testServerWriteCons;
+    }
+    
+    public String getTransLockGran() { 
+        return this.testServerTransLockingGran;
+    }
+    
+    public int getReplicationFactor() {
+        return this.testServerReplicationFactor;
+    }
+    
+    public int getTransRetrials() { 
+        return this.testTransRetrials;
     }
     
     public String getTestInputFilename() {
@@ -83,16 +115,20 @@ public class TestParams
 
     public String toString() { 
         StringBuilder sb = new StringBuilder();
-        sb.append("\tserver graph: ").append(testServerGraphName).append("\n");
-        sb.append("\tserver reset graph flag: ").append(testServerGraphReset).append("\n");
-        sb.append("\ttest input filename: ").append(testInputFilename).append("\n");
-        sb.append("\ttest run steps: ").append(testNum).append("\n");
-        sb.append("\ttest thread num per client: ").append(testThreadNumber).append("\n");
-        sb.append("\ttest warmup period sec: ").append(testWarmupPer).append("\n");
-        sb.append("\ttest running period sec: ").append(testRunningPer).append("\n");
-        sb.append("\ttest operation type: ").append(testOperationType).append("\n");
-        sb.append("\ttest num oper per trans: ").append(testOperationNum).append("\n");
-        sb.append("\ttest trans num of retrials: ").append(testRunningPer).append("\n");
+        sb.append("\tSERVER PARAMS: ").append(testServerGraphName).append(" ");
+        sb.append(testServerGraphReset).append(" ").append(testServerReadCons);
+        sb.append(" ").append(testServerWriteCons).append(" ").append(testServerTransLockingGran);
+        sb.append(" ").append(testServerReplicationFactor).append("\n");
+        
+        sb.append("\tTEST PARAMS: \n");
+        sb.append("\t\tinput filename: ").append(testInputFilename).append("\n");
+        sb.append("\t\trun steps: ").append(testNum).append("\n");
+        sb.append("\t\tthread num per client: ").append(testThreadNumber).append("\n");
+        sb.append("\t\twarmup period sec: ").append(testWarmupPer).append("\n");
+        sb.append("\t\trunning period sec: ").append(testRunningPer).append("\n");
+        sb.append("\t\toperation type: ").append(testOperationType).append("\n");
+        sb.append("\t\tnum oper per trans: ").append(testOperationNum).append("\n");
+        sb.append("\t\ttrans num of retrials: ").append(testRunningPer).append("\n");
         return sb.toString();
     }
     

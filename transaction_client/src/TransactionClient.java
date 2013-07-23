@@ -21,20 +21,34 @@ import org.semanticweb.yars.nx.parser.NxParser;
 // this must sent random transactions to the server
 public class TransactionClient
 {
-	private String server_hostname;
-	private int no_threads; 
-	private int time_run_per_thread;
 	private String input_filename;
-        private Integer operation_type;
-	private String graph;
+        private String server_http_address;
+        private String graph_name;
         private int reset_flag;
-
+        private String read_cons;
+        private String write_cons;
+        private String trans_lock_gran;
+        private int repl_factor;
+        private int no_threads;
+        private int time_run_per_th;
+        // after this timeout the results are gathered 
+        private int warmup_period;
+        private String input_nt_file;
+        private int operation_type;
+        private int no_operations_per_transaction;
+        private int no_retrials;
+        private String distr_flag;
+        private String operation_name;
+        private String working_dir;
+        private String client_id;
+   
 	private ArrayList<Node[]> input_triples;
 	private Thread[] client_threads;
 	public int total_successful;
 
         final public static String SERVER_TRANSACTION_SERVLET="/transaction";
         final public static String SERVER_HANDLE_GRAPHS_SERVLET="/graph";
+        final public static String SERVER_SETUP_SERVLET="/setup";
 
         public static final String FILENAME_SUFFIX_READY_WARMUP = "-client-ready-for-warmup";
         public static final String FILENAME_SUFFIX_START_SENDING_REQUESTS = "-start-sending-requests";
@@ -117,7 +131,7 @@ public class TransactionClient
 			// new value
 			//sb.append("<"+random_node[2]+">").append(",");
 			sb.append("<NEW_"+random_node[2]+">").append(",");
-			sb.append(graph);
+			sb.append(graph_name);
 		         sb.append(",");
 			// old value of the update
 			sb.append("<"+random_node[2]+">").append(");");
@@ -137,7 +151,7 @@ public class TransactionClient
 			sb.append("<"+random_node[1]+">").append(",");
 			// new value
 			sb.append("<"+random_node[2]+">").append(",");
-			sb.append(graph).append(");");
+			sb.append(graph_name).append(");");
 			return sb.toString();
 		}
 
@@ -153,7 +167,7 @@ public class TransactionClient
                                 sb.append("<"+random_node[0]+">").append(",");
                                 sb.append("<"+random_node[1]+">").append(",");
                                 sb.append("<"+random_node[2]+">").append(",");
-                                sb.append(graph).append(");");
+                                sb.append(graph_name).append(");");
                         return sb.toString();
                 }
 
@@ -223,13 +237,15 @@ public class TransactionClient
                                                 sb.append(createADelete(1));
                                                 break;
                                         case 6: // entity shallow copy
-                                                sb.append(createAnCopyShallow(graph, graph));
+                                                sb.append(createAnCopyShallow(graph_name, 
+                                                        graph_name));
                                                 break;
                                         case 7: // entity deep copy
-                                                sb.append(createAnCopyDeep(graph, graph));
+                                                sb.append(createAnCopyDeep(graph_name, 
+                                                        graph_name));
                                                 break;
                                         case 8: // entity full delete
-                                                sb.append(createDeleteEntity(graph));
+                                                sb.append(createDeleteEntity(graph_name));
                                                 break;
                                         default:
                                                 break;
@@ -243,9 +259,9 @@ public class TransactionClient
 
 		private void sendTransaction() { 
 			StringBuilder transaction = createTransaction();
-			String urlParameters = "g="+graph+"&retries="+this.retrials+"&t="+transaction.toString();
+			String urlParameters = "g="+graph_name+"&retries="+this.retrials+"&t="+transaction.toString();
 			try {
-				URL url = new URL(server_hostname+SERVER_TRANSACTION_SERVLET);
+				URL url = new URL(server_http_address+SERVER_TRANSACTION_SERVLET);
 				this.connection = (HttpURLConnection) url.openConnection();           
 				this.connection.setDoOutput(true);
 				this.connection.setDoInput(true);
@@ -297,16 +313,15 @@ public class TransactionClient
 	public TransactionClient(String sta, int noth, int time_per_thread,
                 String input_filename, Integer operation_type, String graph, 
                 int reset_flag) {
-		this.server_hostname = sta;
+		this.server_http_address = sta;
 		this.no_threads = noth;
-		this.time_run_per_thread = time_per_thread;
+		this.time_run_per_th = time_per_thread;
 		this.input_filename = input_filename;
                 this.operation_type = operation_type;
-		this.graph = graph;
+		this.graph_name = graph;
 		this.input_triples = new ArrayList<Node[]>();
                 this.reset_flag = reset_flag;
 		init();
-                dbinit();
 	}
 	
 	// read the input file and populate the input_triples structure
@@ -343,12 +358,14 @@ public class TransactionClient
 		}
 	}
 	
-        private void dbinit() {
-          // reset the graph if needed
+        public void dbinit() {
+            // change consistency
+            changeReadWriteConsistency(read_cons, write_cons);
+            // reset the graph if needed
             if( reset_flag == 1 ) {
-                    System.out.println("Delete and (re)create the graph " + graph);
-                    deleteGraph(graph);
-                    createNewGraph(graph);
+                    System.out.println("Delete and (re)create the graph " + graph_name);
+                    deleteGraph(graph_name);
+                    createNewGraph(graph_name);
             }
         }
         
@@ -411,7 +428,7 @@ public class TransactionClient
         public void deleteGraph(String graph) {
                 HttpURLConnection connection;
                 try {
-                        URL url = new URL(server_hostname+SERVER_HANDLE_GRAPHS_SERVLET+"?g="+graph+"&f=y");
+                        URL url = new URL(server_http_address+SERVER_HANDLE_GRAPHS_SERVLET+"?g="+graph+"&f=y");
                         connection = (HttpURLConnection) url.openConnection();
                         connection.setDoOutput(true);
                         connection.setDoInput(true);
@@ -437,7 +454,7 @@ public class TransactionClient
                 HttpURLConnection connection;
                 String urlParameters = "g_id="+graph+"&g_p=<createdBy>&g_v=\"transaction_client\"";
                 try {
-                        URL url = new URL(server_hostname+SERVER_HANDLE_GRAPHS_SERVLET);
+                        URL url = new URL(server_http_address+SERVER_HANDLE_GRAPHS_SERVLET);
                         connection = (HttpURLConnection) url.openConnection();
                         connection.setDoOutput(true);
                         connection.setDoInput(true);
@@ -456,8 +473,41 @@ public class TransactionClient
                         String line;
                         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                         line = reader.readLine();
-                        //System.out.println(line);
+                        System.out.println("Create new graph: " + line);
 
+                        connection.disconnect();
+                } catch( MalformedURLException ex ) {
+                        ex.printStackTrace();
+                } catch( IOException ex ) {
+                        ex.printStackTrace();
+                }
+        }
+        
+        public void changeReadWriteConsistency(String readCons, String writeCons) {
+                HttpURLConnection connection;
+                String urlParameters = "read_cons="+readCons+"&write_cons="+writeCons;
+                try {
+                        URL url = new URL(server_http_address+SERVER_SETUP_SERVLET);
+                        connection = (HttpURLConnection) url.openConnection();
+                        connection.setDoOutput(true);
+                        connection.setDoInput(true);
+                        connection.setInstanceFollowRedirects(false);
+                        connection.setRequestMethod("POST");
+                        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                        connection.setRequestProperty("charset", "utf-8");
+                        connection.setUseCaches (false);
+                        connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+                        
+                        DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
+                        wr.writeBytes(urlParameters);
+                        wr.flush();
+                        wr.close();
+
+                        String line;
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        line = reader.readLine();
+                        System.out.println("Change read and write consistency levels: "+line);
+                       
                         connection.disconnect();
                 } catch( MalformedURLException ex ) {
                         ex.printStackTrace();
@@ -504,23 +554,28 @@ public class TransactionClient
         }
 
 	public static void main(String[] args) throws IOException, InterruptedException { 
-		if( args.length < 11 ) {
+		if( args.length < 16 ) {
 			System.err.println("Usage: \n" +
                                            "1. server http address \n"+
-					   "2. no of threads \n" +
-                                           "3. time to run per thread (sec) \n" +
-                                           "4. warm-up period (sec) \n" +
-					   "5. input nt file \n" +
-                                           "6. graph name \n" +
-                                           "7. operation type (0:insert, 1:insert_link, 2:update, 3:update_link" +
+                                           "2. graph name \n" +
+                                           "3. reset graph (0:do nothing, 1:delete&create)\n" +
+                                           "4. read consistency (one, two, three, quorum, all)\n" + 
+                                           "5. write consistency (one, two, three, quorum, all, any)\n" +
+                                           "6. transactional locking granularity (e, ep, epv)\n" + 
+                                           "7. replication factor \n"+
+					   "8. no of threads \n" +
+                                           "9. time to run per thread (sec) \n" +
+                                           "10. warm-up period (sec) \n" +
+					   "11. input nt file \n" +
+                                           "12. operation type (0:insert, 1:insert_link, 2:update, 3:update_link" +
                                            ", 4:delete, 5:delete_link, 6:entity_shallow_copy, 7:entity_deep_copy," +
                                            " 8:entity_full_delete) \n" +
-                                           "8. number of operations to run per transaction \n" +
-                                           "9. reset graph (0:do nothing, 1:delete&create)\n" +
-                                           "10. number of retrials (if transaction conficts)\n" + 
-                                           "11. distributed mode flag (yes/no); NOTE: if yes, the following parameters are used\n" +
-                                           "12. working directory (needed to run remote ssh commands)\n" +
-                                           "13. client ID (also used by reomte ssh commands)");
+                                           "13. number of operations to run per transaction \n" +
+                                           "14. number of retrials (if transaction conficts)\n" + 
+                                           "15. distributed mode flag (yes/no); NOTE: if yes, the following parameters are used\n" +
+                                           "16. working directory (needed to run remote ssh commands)\n" +
+                                           "17. client ID (also used by reomte ssh commands)\n" +
+                                           "18. INIT FLAG (at most 1client must use this flag; it resets consistency, graph and others)");
 			System.exit(1);
 		}
                 //IMPORTANT FOR TESTING TOOL; DO NOT DELETE!
@@ -534,17 +589,24 @@ public class TransactionClient
 		System.out.println("");
 
 		String server_http_address = args[0]; 
-		int no_threads =  ( Integer.valueOf(args[1]) < 1 ) ? 1 : Integer.valueOf(args[1]);
-		int time_run_per_th = ( Integer.valueOf(args[2]) < 1 ) ? 1 : Integer.valueOf(args[2]);
+                String graph_name = args[1];
+                int reset_flag = Integer.valueOf(args[2]);
+                String read_cons = args[3];
+                String write_cons = args[4];
+                String trans_lock_gran = args[5];
+                int repl_factor = Integer.valueOf(args[6]);
+                
+		int no_threads =  ( Integer.valueOf(args[7]) < 1 ) ? 1 : Integer.valueOf(args[7]);
+		int time_run_per_th = ( Integer.valueOf(args[8]) < 1 ) ? 1 : Integer.valueOf(args[8]);
                 // after this timeout the results are gathered 
-                int warmup_period = Integer.valueOf(args[3]);
-		String input_nt_file = args[4];
-		String graph_name = args[5];
-                int operation_type = Integer.valueOf(args[6]);
-		int no_operations_per_transaction = ( Integer.valueOf(args[7]) < 1 ) ? 1 : Integer.valueOf(args[7]);
-                int reset_flag = Integer.valueOf(args[8]);
-                int no_retrials = Integer.valueOf(args[9]);
-                String distr_flag = args[10]; 
+                int warmup_period = Integer.valueOf(args[9]);
+		String input_nt_file = args[10];
+		
+                int operation_type = Integer.valueOf(args[11]);
+		int no_operations_per_transaction = ( Integer.valueOf(args[12]) < 1 ) ? 1 : Integer.valueOf(args[12]);
+                
+                int no_retrials = Integer.valueOf(args[13]);
+                String distr_flag = args[14]; 
                 String operation_name = getOperationName(operation_type);
                 if( operation_name == null ) {
                         System.out.println("[ERROR] Please pass a correct operation type. See the 'usage'!");
@@ -556,13 +618,21 @@ public class TransactionClient
                 String client_id="-1";
                 if( distr_flag !=null && ! distr_flag.isEmpty() && distr_flag.equals("yes") ) {
                     System.out.println("Distributed mode is on, thus use synch mechanism ... ");
-                    working_dir = args[11];
-                    client_id = args[12];
+                    working_dir = args[15];
+                    client_id = args[16];
+                }
+                
+                boolean setup_server = false;
+                if( args[17] != null ) { 
+                    setup_server = true;
                 }
                 
                 // create and init the client 
                 TransactionClient tc = new TransactionClient(server_http_address, no_threads, time_run_per_th,
                                                                 input_nt_file, operation_type, graph_name, reset_flag);
+                if( setup_server ) {
+                    tc.dbinit();
+                }
 
                 if( distr_flag !=null && ! distr_flag.isEmpty() && distr_flag.equals("yes") ) {
                     // initializations are done, so create the local msg

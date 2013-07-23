@@ -568,10 +568,14 @@ public class MachineManager
                         + " is null or empty.");
             }
             int serverGraphReset = testConfig.getInt("server.graph.reset", 0);
+            String serverReadCons = testConfig.getString("server.read.consistency", "one" );
+            String serverWriteCons = testConfig.getString("server.write.consistency", "one" );
+            String serverTransLockingGran = testConfig.getString("server.trans.locking.granularity", "epv");
+            int serverReplicationFactor = testConfig.getInt("server.replication.factor", 1);
             
             // client related params
             String testInputFilename = testConfig.getString("test.input.filename");
-            int testNum = testConfig.getInt("test.num", 1);
+            int testRepeat = testConfig.getInt("test.num", 1);
             int testThreadNum = testConfig.getInt("test.thread.num", 1);
             int testWarmupPer = testConfig.getInt("test.period.warmup", 1);
             int testRunningPer = testConfig.getInt("test.period.running", 10);
@@ -579,9 +583,10 @@ public class MachineManager
             int testOperNum = testConfig.getInt("test.operation.num", 1);
             int testTransRetrials = testConfig.getInt("test.transaction.retrials", 5);
             
-            tests.add(new TestParams(serverGraphName, serverGraphReset, testInputFilename, 
-                    testNum, testThreadNum, testWarmupPer, testRunningPer, testOperType, 
-                    testOperNum, testTransRetrials, nameWithExtension));
+            tests.add(new TestParams(serverGraphName, serverGraphReset, serverReadCons,
+                    serverWriteCons, serverTransLockingGran, serverReplicationFactor,
+                    testInputFilename, testRepeat, testThreadNum, testWarmupPer, testRunningPer, 
+                    testOperType, testOperNum, testTransRetrials, nameWithExtension));
         }
     }
     
@@ -860,8 +865,6 @@ public class MachineManager
         for(Iterator it=clients.iterator(); it.hasNext(); ) { 
             Client c = (Client)it.next();
             String clientDir = currentDir+"/"+testNum+"client"+c.getId();
-            
-System.out.println(clientDir);
             
             try {
                 String cmd[] = {"/bin/bash","-c", "rm -r " + clientDir};

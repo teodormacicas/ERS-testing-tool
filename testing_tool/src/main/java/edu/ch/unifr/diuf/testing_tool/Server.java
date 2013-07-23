@@ -9,6 +9,10 @@ public class Server extends Machine
      // this is also used by the clients to know where to connect to
      private String serverListenIp;
      private int serverPort;
+     private String serverReadCons; 
+     private String serverWriteCons; 
+     private String serverTransLockGran; 
+     private int serverReplicationFactor; 
      
      // each test will use one graph
      private String serverGraph;
@@ -141,5 +145,69 @@ public class Server extends Machine
      */
     public int getGraphReset() { 
         return this.serverResetGraph;
+    }
+
+    /**
+     * 
+     * @param readCons 
+     */
+    public void setReadCons(String readCons) { 
+        this.serverReadCons = readCons;
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public String getReadCons() { 
+        return this.serverReadCons;
+    }
+    
+    /**
+     * 
+     * @param writeCons 
+     */
+    public void setWriteCons(String writeCons) { 
+        this.serverWriteCons = writeCons;
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public String getWriteCons() { 
+        return this.serverWriteCons;
+    }
+    
+    /**
+     * 
+     * @param transLockGran 
+     */
+    public void setTransLockGran(String transLockGran) { 
+        this.serverTransLockGran = transLockGran;
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public String getTransLockGran() { 
+        return this.serverTransLockGran;
+    }
+    
+    /**
+     * 
+     * @param replFactor
+     */
+    public void setReplFactor(int replFactor) { 
+        this.serverReplicationFactor = replFactor;
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public int getReplFactor() { 
+        return this.serverReplicationFactor;
     }
 }

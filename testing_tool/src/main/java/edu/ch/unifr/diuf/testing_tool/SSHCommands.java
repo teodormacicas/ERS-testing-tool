@@ -161,6 +161,9 @@ public class SSHCommands
      * @throws TransportException
      * @throws IOException 
      */
+    
+//TODO: add read cons, .... as params 
+    
     public static int startClientProgram(Client client, Server server, SSHClient ssh) 
             throws TransportException, IOException, InterruptedException {
         final Session session = ssh.startSession();
@@ -170,23 +173,27 @@ public class SSHCommands
             sb.append(Utils.getClientProgramRemoteFilename(client));
             sb.append(" http://").append(server.getServerHTTPListenAddress()).append(":")
                     .append(server.getServerHttpPort()).append(" ");
+            String escapedGraph = server.getGraph().replace("<", "\\<").replace(">", "\\>");
+            sb.append(escapedGraph).append(" ");
+            sb.append(server.getGraphReset()).append(" "); 
+            sb.append(server.getReadCons()).append(" ");
+            sb.append(server.getWriteCons()).append(" ");
+            sb.append(server.getTransLockGran()).append(" ");
+            sb.append(server.getReplFactor()).append(" ");
             sb.append(client.getNoThreads()).append(" ");
             sb.append(client.getRunningPeriod()).append(" ");
             sb.append(client.getWarmupPeriod()).append(" ");
             sb.append(Utils.getClientRemoteDataFilename(client)).append(" "); 
-            String escapedGraph = server.getGraph().replace("<", "\\<").replace(">", "\\>");
-            sb.append(escapedGraph).append(" "); 
             sb.append(client.getOperationType()).append(" "); 
             sb.append(client.getOperationNum()).append(" "); 
-            // only one client does the reset if it is set
-            if( client.getId() == 0 ) 
-                sb.append(server.getGraphReset()).append(" "); 
-            else
-                sb.append("0 "); 
             sb.append(client.getTransRetrials()).append(" "); 
+            // distributed mode
             sb.append("yes ");
             sb.append(client.getWorkingDirectory()).append(" "); 
             sb.append(client.getUUID()).append(" "); 
+            if( client.getId() == 0 ) { 
+                sb.append("yes ");
+            }
             // output to a log file 
             sb.append(" &> ");
             sb.append(Utils.getClientLogRemoteFilename(client));
