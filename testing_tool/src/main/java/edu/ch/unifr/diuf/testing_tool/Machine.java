@@ -53,10 +53,10 @@ public class Machine
     private int port;
     private Integer PID;
     
-    private String sshUsername;
-    private String sshPassword;
+    protected String sshUsername;
+    protected String sshPassword;
     
-    private String workingDirectory;
+    protected String workingDirectory;
     
     public Machine() {
         this.UUID = Utils.generateRandomUUID();

@@ -372,6 +372,7 @@ public class Client extends Machine
      */
     public void uploadProgram(String file, SSHClient ssh_client) 
             throws FileNotFoundException, IOException {
+        SSHCommands.createRemoteFolder(this, this.workingDirectory, ssh_client);
         this.uploadFile(file, Utils.getClientProgramRemoteFilename(this), ssh_client);
     }              
 

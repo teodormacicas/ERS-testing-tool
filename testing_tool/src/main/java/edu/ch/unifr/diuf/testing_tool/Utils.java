@@ -82,18 +82,6 @@ public class Utils
         return "log-server" + testNum + ".data";
     }
     
-    public static String getServerLocalCPUFilename(int testNum, int delay) {
-        return "log-CPU-server" + "-test" + testNum + "-delay" + delay + ".data";
-    }
-    
-    public static String getServerLocalMEMFilename(int testNum, int delay) {
-        return "log-MEM-server" + "-test" + testNum + "-delay" + delay + ".data";
-    }
-    
-    public static String getServerLocalTopFilename(Machine s, int testNum) {
-        return "log-TOP-server" + testNum + ".data";
-    }
-    
     public static String getClientRemoteReadyWarmupFilename(Client c) {
         return c.getWorkingDirectory()+"/"+c.getUUID()+Utils.CLIENT_REMOTE_FILENAME_SUFFIX_READY_WARMUP;
     }

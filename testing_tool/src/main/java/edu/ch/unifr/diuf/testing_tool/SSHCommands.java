@@ -345,7 +345,7 @@ public class SSHCommands
         final Session session = ssh.startSession();
         try {
             // run just a dummy command
-            final Command cmd = session.exec("mkdir " + folderName);
+            final Command cmd = session.exec("mkdir -p " + folderName);
             cmd.join();      
             return cmd.getExitStatus();
         } finally {
