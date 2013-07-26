@@ -9,6 +9,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -560,6 +561,9 @@ public class MachineManager
         for(String name : testsPropertyFileNames) {
             String nameWithExtension = name + ".properties";
             Configuration testConfig = new PropertiesConfiguration(nameWithExtension);
+            TestParams tp = new TestParams();
+            tp.setNumClients(clients.size());
+            tp.setTestName(name);
             
             // server related params
             String serverGraphName = testConfig.getString("server.graph.name");
@@ -567,33 +571,33 @@ public class MachineManager
                 throw new ConfigurationException("Graph name for test " + nameWithExtension 
                         + " is null or empty.");
             }
-            int serverGraphReset = testConfig.getInt("server.graph.reset", 0);
-            int serverGraphSnapshot = testConfig.getInt("server.graph.snapshot", 0);
-            String serverReadCons = testConfig.getString("server.read.consistency", "one" );
-            String serverWriteCons = testConfig.getString("server.write.consistency", "one" );
-            String serverTransLockingGran = testConfig.getString("server.trans.locking.granularity", "epv");
-            int serverReplicationFactor = testConfig.getInt("server.replication.factor", 1);
+            tp.setTestServerGraphName(serverGraphName);
+            tp.setTestServerGraphReset(testConfig.getInt("server.graph.reset", 0));
+            tp.setGraphSnapshot(testConfig.getInt("server.graph.snapshot", 0));
+            tp.setTestReadCons(testConfig.getString("server.read.consistency", "one" ));
+            tp.setTestWriteCons(testConfig.getString("server.write.consistency", "one" ));
+            tp.setTransLockGran(testConfig.getString("server.trans.locking.granularity", "epv"));
+            tp.setReplicationFactor(testConfig.getInt("server.replication.factor", 1));
             
             // client related params
-            //String testInputFilename = testConfig.getString("test.input.filename");
-            int testRepeat = testConfig.getInt("test.num", 1);
-            int testThreadNum = testConfig.getInt("test.thread.num", 1);
-            int testWarmupPer = testConfig.getInt("test.period.warmup", 1);
-            int testRunningPer = testConfig.getInt("test.period.running", 10);
-            int testOperType = testConfig.getInt("test.operation.type", 0);
-            int testOperNum = testConfig.getInt("test.operation.num", 1);
-            int testTransRetrials = testConfig.getInt("test.transaction.retrials", 5);
+            tp.setTestNum(testConfig.getInt("test.num", 1));
+            List testThreadNumList = testConfig.getList("test.thread.num", Arrays.asList(1));
+            for(Iterator it=testThreadNumList.iterator(); it.hasNext(); ) {
+                Integer threadNum = Integer.valueOf((String)it.next());
+                tp.addTestThreadNum(threadNum);                
+            }
+            tp.setTestWarmupPer(testConfig.getInt("test.period.warmup", 1));
+            tp.setTestRunningPer(testConfig.getInt("test.period.running", 10));
+            tp.setTestOperationType(testConfig.getInt("test.operation.type", 0));
+            tp.setTestOperationNum(testConfig.getInt("test.operation.num", 1));
+            tp.setTestTransRetrials(testConfig.getInt("test.transaction.retrials", 5));
+            tp.setConflictsParameter(testConfig.getString("test.conflicts", "no"));
+            tp.setDiffEnt(testConfig.getInt("test.num.diff.e", 10));
+            tp.setDiffPropPerEnt(testConfig.getInt("test.num.diff.p.per.e", 5));
+            tp.setDiffValuesPerProp(testConfig.getInt("test.num.diff.v.per.p", 1));
             
-            int testDiffEnt = testConfig.getInt("test.num.diff.e", 10);
-            int testDiffPropPerEnt = testConfig.getInt("test.num.diff.p.per.e", 5);
-            int testDiffValuePerProp = testConfig.getInt("test.num.diff.v.per.p", 1);
-            
-            tests.add(new TestParams(clients.size(), serverGraphName, serverGraphReset, 
-                    serverGraphSnapshot, serverReadCons,
-                    serverWriteCons, serverTransLockingGran, serverReplicationFactor,
-                    testRepeat, testThreadNum, testWarmupPer, testRunningPer, 
-                    testOperType, testOperNum, testTransRetrials, nameWithExtension,
-                    testDiffEnt, testDiffPropPerEnt, testDiffValuePerProp));
+            // add the new test scenario
+            tests.add(tp);
         }
     }
     
@@ -865,26 +869,22 @@ public class MachineManager
      * Download on local folder all the logs from server and clients.
      * @throws IOException 
      */
-    public void downloadAllLogs() throws IOException, InterruptedException { 
+    public void downloadAllLogs(String resultFile, int testNo) throws IOException, InterruptedException { 
         String currentDir = new java.io.File( "." ).getCanonicalPath();
 
         int counter=-1;
         for(Iterator it=clients.iterator(); it.hasNext(); ) { 
             Client c = (Client)it.next();
-            String clientDir = currentDir+"/"+testNum+"client"+c.getId();
+            String testRunDir = currentDir+"/"+server.getTestName()+"/"+testNo+"/";
             
-            try {
-                String cmd[] = {"/bin/bash","-c", "rm -r " + clientDir};
-                Runtime.getRuntime().exec(cmd).waitFor();
-                String cmd2[] = {"/bin/bash","-c", "mkdir " + clientDir};
-                Runtime.getRuntime().exec(cmd2).waitFor();
-            } catch (IOException|InterruptedException ex) {
-                Logger.getLogger(Coordinator.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            Runtime.getRuntime().exec(new String[]{"/bin/bash","-c", "mkdir " + testRunDir}).waitFor();
             
+            String localFilename = testRunDir+Utils.getClientLocalFilename(c, ++counter, testNo);
             SSHCommands.downloadRemoteFile(c, Utils.getClientLogRemoteFilename(c),
-                    clientDir+"/"+Utils.getClientLocalFilename(c, ++counter, testNum), 
-                    sshClients.get(c.getId()+1));
+                    localFilename, sshClients.get(c.getId()+1));
+            
+            Runtime.getRuntime().exec(new String[]{"/bin/bash", 
+                "-c", "tail -n1 " + localFilename + " >> " + currentDir+"/"+server.getTestName()+"/"+resultFile}).waitFor();
         }
         testNum++;
     }

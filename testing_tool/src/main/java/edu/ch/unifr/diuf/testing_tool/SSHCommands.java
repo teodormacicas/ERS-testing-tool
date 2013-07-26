@@ -143,7 +143,7 @@ public class SSHCommands
         final Session session = ssh.startSession();
         try {
             // run just a dummy command
-            final Command cmd = session.exec("ping -c 5 " + machine.getServerIpAddress());
+            final Command cmd = session.exec("ping -c 2 " + machine.getServerIpAddress());
             //System.out.println(IOUtils.readFully(cmd.getInputStream()).toString());
             cmd.join();
             return cmd.getExitStatus();
@@ -184,7 +184,6 @@ public class SSHCommands
             sb.append(client.getNoThreads()).append(" ");
             sb.append(client.getRunningPeriod()).append(" ");
             sb.append(client.getWarmupPeriod()).append(" ");
-            sb.append(Utils.getClientRemoteDataFilename(client)).append(" "); 
             sb.append(client.getOperationType()).append(" "); 
             sb.append(client.getOperationNum()).append(" "); 
             sb.append(client.getTransRetrials()).append(" "); 
@@ -192,6 +191,7 @@ public class SSHCommands
             sb.append("yes ");
             sb.append(client.getWorkingDirectory()).append(" "); 
             sb.append(client.getUUID()).append(" "); 
+            sb.append(client.getConflictsFlag()).append(" ");
             sb.append(client.getDiffE()).append(" ");
             sb.append(client.getDiffPperE()).append(" ");
             sb.append(client.getDiffVperP()).append(" ");

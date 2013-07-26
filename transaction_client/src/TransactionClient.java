@@ -39,6 +39,7 @@ public class TransactionClient
         private String working_dir;
         private String client_id;
         
+        private String conflictFlag;
         private int numDiffEnt; 
         private int numDiffPropPerEnt; 
         private int numDiffValuePerProp;
@@ -60,6 +61,7 @@ public class TransactionClient
                 private int operation_type;
                 private int no_op_per_t;
                 private int retrials;
+                private int thread_id;
 
                 // this flag will be set to true after the warmup period
                 private boolean collect_results;
@@ -75,11 +77,21 @@ public class TransactionClient
                 private int total_trans;
 		
 		private HttpURLConnection connection;
+                
+                private final int PperE = 20;
+                private final int VperP = 5;
+                
+                // used to create non conflicting data when conflict flag is set to 'no'
+                private int counter_e;
+                private int counter_p;
+                private int counter_v;
 
-		public ClientThread(int operation_type, int no_op_per_t, int retrials) {
+		public ClientThread(int operation_type, int no_op_per_t, int retrials, 
+                        int thread_id) {
                         this.operation_type = operation_type;
                         this.no_op_per_t = no_op_per_t;
                         this.retrials = retrials;
+                        this.thread_id = thread_id;
 
                         this.collect_results = false;
 			this.finished = false; 
@@ -90,6 +102,10 @@ public class TransactionClient
 			this.conflicted_trans = 0;
 			this.aborted_trans = 0;
                         this.total_trans = 0;
+                        
+                        this.counter_e = 0;
+                        this.counter_p = 0;
+                        this.counter_v = 0;
 		}
 
 		public int getSuccessfulTrans() {
@@ -118,22 +134,42 @@ public class TransactionClient
                         this.start_collection_res_time = System.currentTimeMillis();
                 }
 
-                private Node[] getRandomNode() { 
-                    int randomInt;
+                private Node[] getRandomNode(boolean deleteFullEntity) { 
+                    String randomE, randomP, randomV;
                     Node[] n = new Node[3];
-                    randomInt = random_gen.nextInt(numDiffEnt);
-                    n[0] = new Variable("eeeeeeeeeeeeeeeeeeeeee"+randomInt);
-                    randomInt = random_gen.nextInt(numDiffPropPerEnt);
-                    n[1] = new Variable("pppppppppppppppppppppp"+randomInt);
-                    randomInt = random_gen.nextInt(numDiffValuePerProp);
-                    n[2] = new Variable("vvvvvvvvvvvvvvvvvvvvvv"+randomInt);
+                    if( conflictFlag.equals("yes") ) {
+                        randomE = String.valueOf(random_gen.nextInt(numDiffEnt));
+                        randomP = String.valueOf(random_gen.nextInt(numDiffPropPerEnt));
+                        randomV = String.valueOf(random_gen.nextInt(numDiffValuePerProp));
+                    }
+                    else { 
+                        if( deleteFullEntity ) 
+                            ++counter_e;
+                        else {
+                            if( ++counter_v > VperP ) {
+                                counter_v = 0; 
+                                if( ++counter_p > PperE ) {
+                                    counter_p = 0;
+                                    counter_e++;
+                                }
+                            }
+                        }
+                        randomE = client_id + "-" + thread_id + "-" + counter_e;
+                        randomP = client_id + "-" + thread_id + "-" + counter_e
+                                + "-" + counter_p;
+                        randomV = client_id + "-" + thread_id + "-" + counter_e
+                                + "-" + counter_p + "-" + counter_v;
+                    }
+                    n[0] = new Variable("eeeeeeeeeeeeeeeeeeeeee"+randomE);
+                    n[1] = new Variable("pppppppppppppppppppppp"+randomP);
+                    n[2] = new Variable("vvvvvvvvvvvvvvvvvvvvvv"+randomV);
                     //return input_triples.get(randomInt); 
                     return n;
                 }
                 
                 private String createAnInsert(Integer linkFlag) {
 			//Node[] random_node = input_triples.get(randomInt); 
-                        Node[] random_node = getRandomNode(); 
+                        Node[] random_node = getRandomNode(false); 
 			// create one insert ere
 			StringBuilder sb = new StringBuilder(); 
         		 if( linkFlag != 0 ) 
@@ -149,7 +185,7 @@ public class TransactionClient
 		}
                 
 		private String createAnUpdate(Integer linkFlag) { 
-                        Node[] random_node = getRandomNode();
+                        Node[] random_node = getRandomNode(false);
 			// create one update here
 			StringBuilder sb = new StringBuilder(); 
 		         if( linkFlag != 0 ) 
@@ -162,14 +198,14 @@ public class TransactionClient
 			//sb.append("<"+random_node[2]+">").append(",");
 			sb.append("<"+random_node[2]+">").append(",");
 			sb.append(graph_name);
-		         sb.append(",");
+		        sb.append(",");
 			// old value of the update
 			sb.append("<"+random_node[2]+">").append(");");
 			return sb.toString();
 		}
 
                 private String createADelete(Integer linkFlag) {
-                        Node[] random_node = getRandomNode();
+                        Node[] random_node = getRandomNode(false);
                         // create one insert ere
                         StringBuilder sb = new StringBuilder();
                         if( linkFlag != 0 )
@@ -184,35 +220,35 @@ public class TransactionClient
                 }
 
                 private String createAnCopyShallow(String graph_src, String graph_dest) {
-                        Node[] random_node = getRandomNode();
+                        Node[] random_node = getRandomNode(false);
                         // create one shallow copy here
                         StringBuilder sb = new StringBuilder();
                         sb.append("shallow_clone(");
                         sb.append("<"+random_node[0]+">").append(",");
                         sb.append(graph_src).append(",");
                         // new entity
-                        sb.append("<NEW_"+random_node[0]+">").append(",");
+                        sb.append("<NEW_"+random_node[2]+">").append(",");
                         sb.append(graph_dest);
                         sb.append(");");
                         return sb.toString();
                 }
 
                 private String createAnCopyDeep(String graph_src, String graph_dest) {
-			Node[] random_node = getRandomNode();
+			Node[] random_node = getRandomNode(false);
 			// create one deep copy 
 			StringBuilder sb = new StringBuilder(); 
 			sb.append("deep_clone(");
 			sb.append("<"+random_node[0]+">").append(",");
 			sb.append(graph_src).append(",");
 			// new entity
-			sb.append("<NEW_"+random_node[0]+">").append(",");
+			sb.append("<NEW_"+random_node[2]+">").append(",");
 			sb.append(graph_dest);
 			sb.append(");");
 			return sb.toString();
 		}
 
                 private String createDeleteEntity(String graph_src) {
-			Node[] random_node = getRandomNode();
+			Node[] random_node = getRandomNode(true);
 			// create one deep copy 
 			StringBuilder sb = new StringBuilder(); 
 			sb.append("delete_all(");
@@ -389,7 +425,7 @@ public class TransactionClient
 		for(int i=0; i<this.no_threads; ++i)
 			client_threads[i] = new ClientThread(
                                 operation_type, no_operations_per_transaction, 
-                                no_retrials);
+                                no_retrials, i);
 
 		for(int i=0; i<this.no_threads; ++i)
 			client_threads[i].start();
@@ -637,7 +673,7 @@ public class TransactionClient
         }
 
 	public static void main(String[] args) throws IOException, InterruptedException { 
-		if( args.length < 20 ) {
+		if( args.length < 21 ) {
 			System.err.println("Usage: \n" +
                                            "1. server http address \n"+
                                            "2. graph name \n" +
@@ -650,15 +686,15 @@ public class TransactionClient
 					   "9. no of threads \n" +
                                            "10. time to run per thread (sec) \n" +
                                            "11. warm-up period (sec) \n" +
-					   "12. input nt file \n" +
-                                           "13. operation type (0:insert, 1:insert_link, 2:update, 3:update_link" +
+                                           "12. operation type (0:insert, 1:insert_link, 2:update, 3:update_link" +
                                            ", 4:delete, 5:delete_link, 6:entity_shallow_copy, 7:entity_deep_copy," +
                                            " 8:entity_full_delete) \n" +
-                                           "14. number of operations to run per transaction \n" +
-                                           "15. number of retrials (if transaction conficts)\n" + 
-                                           "16. distributed mode flag (yes/no); NOTE: if yes, the following parameters are used\n" +
-                                           "17. working directory (needed to run remote ssh commands)\n" +
-                                           "18. client ID (also used by reomte ssh commands)\n" +
+                                           "13. number of operations to run per transaction \n" +
+                                           "14. number of retrials (if transaction conficts)\n" + 
+                                           "15. distributed mode flag (yes/no); NOTE: if yes, the following parameters are used\n" +
+                                           "16. working directory (needed to run remote ssh commands)\n" +
+                                           "17. client ID (also used by reomte ssh commands)\n" +
+                                           "18. conflicts flag (if no, the following params are not used)\n" +  
                                            "19. number different entities \n" +
                                            "20. number different properties per entity \n" +
                                            "21. number different values per property \n" +
@@ -690,13 +726,12 @@ public class TransactionClient
 		tc.time_run_per_th = ( Integer.valueOf(args[9]) < 1 ) ? 1 : Integer.valueOf(args[9]);
                 // after this timeout the results are gathered 
                 tc.warmup_period = Integer.valueOf(args[10]);
-		//tc.input_filename = args[11];
 		
-                tc.operation_type = Integer.valueOf(args[12]);
-		tc.no_operations_per_transaction = ( Integer.valueOf(args[13]) < 1 ) ? 1 : Integer.valueOf(args[13]);
+                tc.operation_type = Integer.valueOf(args[11]);
+		tc.no_operations_per_transaction = ( Integer.valueOf(args[12]) < 1 ) ? 1 : Integer.valueOf(args[12]);
                 
-                tc.no_retrials = Integer.valueOf(args[14]);
-                tc.distr_flag = args[15]; 
+                tc.no_retrials = Integer.valueOf(args[13]);
+                tc.distr_flag = args[14]; 
                 tc.operation_name = getOperationName(tc.operation_type);
                 if( tc.operation_name == null ) {
                         System.out.println("[ERROR] Please pass a correct operation type. See the 'usage'!");
@@ -709,9 +744,10 @@ public class TransactionClient
                 tc.client_id="-1";
                 if( tc.distr_flag !=null && ! tc.distr_flag.isEmpty() && tc.distr_flag.equals("yes") ) {
                     System.out.println("Distributed mode is on, thus use synch mechanism ... ");
-                    tc.working_dir = args[16];
-                    tc.client_id = args[17];
+                    tc.working_dir = args[15];
+                    tc.client_id = args[16];
                 }
+                tc.conflictFlag = args[17];
                 tc.numDiffEnt = ( Integer.valueOf(args[18]) < 1 ) ? 1 : Integer.valueOf(args[18]);
                 tc.numDiffPropPerEnt = ( Integer.valueOf(args[19]) < 1 ) ? 1 : Integer.valueOf(args[19]);
                 tc.numDiffValuePerProp = ( Integer.valueOf(args[20]) < 1 ) ? 1 : Integer.valueOf(args[20]);
@@ -761,7 +797,7 @@ public class TransactionClient
                             if( i+5 > tc.time_run_per_th ) 
                                 Thread.sleep(tc.time_run_per_th-i * 1000);
                             else
-                                Thread.sleep(i * 1000);
+                                Thread.sleep(5000);
                         }
                 } catch (InterruptedException ex) {
                         ex.printStackTrace();
@@ -788,8 +824,8 @@ public class TransactionClient
 		System.out.println(" ... after " + tc.no_retrials + " of retrials a transaction was aborted!");
                 
                 System.out.println();
-                System.out.println("Total time, total trans, conflicts, aborted, successful rate/sec, no retrials");
-                System.out.println(total_time + " " + total_trans + " " + conflicts + " " + aborted + " " +
+                System.out.println("No threads,Total time, total trans, conflicts, aborted, successful rate/sec, no retrials");
+                System.out.println(tc.no_threads + " " + total_time + " " + total_trans + " " + conflicts + " " + aborted + " " +
                         ((double)tc.total_successful/total_time*1000) + " "  + tc.no_retrials);
                 
                 if( tc.distr_flag !=null && ! tc.distr_flag.isEmpty() && tc.distr_flag.equals("yes") ) {

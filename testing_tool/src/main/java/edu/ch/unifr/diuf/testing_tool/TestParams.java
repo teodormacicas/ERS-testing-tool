@@ -1,5 +1,9 @@
 package edu.ch.unifr.diuf.testing_tool;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 
 public class TestParams 
 {
@@ -14,50 +18,33 @@ public class TestParams
     private String testServerTransLockingGran; 
     private int testServerReplicationFactor;
     
-    private String testInputFilename;
     private int testNum;
-    private int testThreadNumber;
+    private List testThreadNumber;
     private int testWarmupPer;
     private int testRunningPer;
     private int testOperationType;
     private int testOperationNum;
     private int testTransRetrials;
 
+    private String testConflictsFlag;
     // number of different entities, properties per entity and values per property
     private int testDiffEnt;
     private int testDiffPropPerEnt; 
     private int testDiffValuesPerProf;
     
-    public TestParams(int numClients, String graphName, int graphReset, 
-            int graphSnapshot, String readCons, String writeCons, String transLockGran, int replFactor,
-            int num, int threadNum, int warmupPer, int runningPer, int operType, int operNum, int transRetrials, 
-            String testId, int diffEnt, int diffPropPerEnt, int diffValuesPerProp) {
-        this.numClients = numClients;
-        // server related params
-        this.testServerGraphName = graphName;
-        this.testServerGraphReset = graphReset;
-        this.testServerGraphSnaphshot = graphSnapshot;
-        this.testServerReadCons = readCons; 
-        this.testServerWriteCons = writeCons;
-        this.testServerTransLockingGran = transLockGran;
-        this.testServerReplicationFactor = replFactor;
-        
-        // client related params 
-        //this.testInputFilename = inputFilename;
-        this.testNum = num;
-        this.testThreadNumber = threadNum;
-        this.testWarmupPer = warmupPer;
-        this.testRunningPer = runningPer;
-        this.testOperationType = operType;
-        this.testOperationNum = operNum;
-        this.testTransRetrials = transRetrials;
-        this.testId = testId;
-        
-        this.testDiffEnt = diffEnt; 
-        this.testDiffPropPerEnt = diffPropPerEnt;
-        this.testDiffValuesPerProf = diffValuesPerProp;
+    public TestParams() { 
+        this.testThreadNumber = new ArrayList<>();
     }
+    
 
+    public void setNumClients(int numClients) { 
+        this.numClients = numClients;
+    }
+    
+    public int getNumClients() { 
+        return this.numClients;
+    }
+    
     public String getTestServerGraphName() { 
         return this.testServerGraphName;
     }
@@ -78,73 +65,153 @@ public class TestParams
         return this.testServerGraphSnaphshot;
     }
     
+    public void setGraphSnapshot(int snapshot) { 
+        this.testServerGraphSnaphshot = snapshot;
+    } 
+    
     public String getTestReadCons() { 
         return this.testServerReadCons;
+    }
+    
+    public void setTestReadCons(String read_cons) { 
+        this.testServerReadCons = read_cons;
     }
     
     public String getTestWriteCons() { 
         return this.testServerWriteCons;
     }
     
+    public void setTestWriteCons(String write_cons) { 
+        this.testServerWriteCons = write_cons;
+    }
+    
     public String getTransLockGran() { 
         return this.testServerTransLockingGran;
+    }
+    
+    public void setTransLockGran(String lock_gran) { 
+        this.testServerTransLockingGran = lock_gran;
     }
     
     public int getReplicationFactor() {
         return this.testServerReplicationFactor;
     }
     
+    public void setReplicationFactor(int factor) { 
+        this.testServerReplicationFactor = factor;
+    }
+    
     public int getTransRetrials() { 
         return this.testTransRetrials;
     }
     
-    /*public String getTestInputFilename() {
-        return this.testInputFilename;
-    }*/
-
-    public int getTestNum() {
-        return testNum;
+    public void setTransRetrials(int retrials) { 
+        this.testTransRetrials = retrials;
     }
     
-    public int getTestThreadNum() {
+    public int getTestNum() { 
+        return this.testNum;
+    }
+    
+    public void setTestNum(int num) {
+        this.testNum = num;
+    }
+    
+    public List getTestThreadNum() {
         return this.testThreadNumber;
+    }
+    
+    public void addTestThreadNum(int thread_num) { 
+        this.testThreadNumber.add(thread_num);
     }
     
     public int getTestWarmupPer() { 
         return this.testWarmupPer;
     }
     
+    public void setTestWarmupPer(int warmup_per) { 
+        this.testWarmupPer = warmup_per;
+    }
+    
     public int getTestRunningPer() { 
         return this.testRunningPer;
+    }
+    
+    public void setTestRunningPer(int running_per) { 
+        this.testRunningPer = running_per;
     }
     
     public int getTestOperationType() { 
         return this.testOperationType;
     }
     
+    public void setTestOperationType(int oper_type) { 
+        this.testOperationType = oper_type;
+    }
+    
     public int getTestOperationNum() { 
         return this.testOperationNum;
     }
     
+    public void setTestOperationNum(int oper_num) { 
+        this.testOperationNum = oper_num;
+    }
+    
     public int getTestTransRetrials() { 
-        return this.testThreadNumber;
+        return this.testTransRetrials;
+    }
+    
+    public void setTestTransRetrials(int retrials) { 
+        this.testTransRetrials = retrials;
     }
 
     public int getDiffEnt() { 
         return this.testDiffEnt;
     }
     
+    public void setDiffEnt(int diffEnt) { 
+        this.testDiffEnt = diffEnt;
+    }
+    
     public int getDiffPropPerEnt() { 
         return this.testDiffPropPerEnt;
     }
    
+    public void setDiffPropPerEnt(int propPerEnt) { 
+        this.testDiffPropPerEnt = propPerEnt;
+    }
+    
     public int getDiffValuesPerProp() { 
         return this.testDiffValuesPerProf;
     }
     
-    private double getProbabilityOfConflicts() { 
-        return ((getTestThreadNum()+0.0)*numClients)/
+    public void setDiffValuesPerProp(int valuesPerProp) { 
+        this.testDiffValuesPerProf = valuesPerProp;
+    }
+    
+    private double getProbabilityOfConflicts(int no_threads) { 
+        return ((no_threads+0.0)*numClients)/
                 (testDiffEnt*testDiffPropPerEnt*testDiffValuesPerProf)*100;
+    }
+    
+    public String getConflictsParameter() { 
+        return this.testConflictsFlag;
+    }
+    
+    public void setConflictsParameter(String param) { 
+        this.testConflictsFlag = param;
+    }
+    
+    public String getTestName() { 
+        return this.testId;
+    }
+    
+    public void setTestName(String name) { 
+        this.testId = name;
+    }
+    
+    public String getFinalRestultFilename() { 
+        return "final_result-"+testId+".data";
     }
     
     public String toString() { 
@@ -158,16 +225,29 @@ public class TestParams
         sb.append("\tTEST PARAMS: \n");
         //sb.append("\t\tinput filename: ").append(testInputFilename).append("\n");
         sb.append("\t\trun steps: ").append(testNum).append("\n");
-        sb.append("\t\tthread num per client: ").append(testThreadNumber).append("\n");
+        sb.append("\t\tthread num per client: ");
+        for(Iterator it=testThreadNumber.iterator(); it.hasNext(); ) {
+            sb.append((it.next())).append(" ");
+        }
+        sb.append("\n");
         sb.append("\t\twarmup period sec: ").append(testWarmupPer).append("\n");
         sb.append("\t\trunning period sec: ").append(testRunningPer).append("\n");
         sb.append("\t\toperation type: ").append(testOperationType).append("\n");
         sb.append("\t\tnum oper per trans: ").append(testOperationNum).append("\n");
         sb.append("\t\ttrans num of retrials: ").append(testRunningPer).append("\n");
-        sb.append("\t\tnum of different entities: ").append(testDiffEnt).append("\n");
-        sb.append("\t\tnum of different prop per ent: ").append(testDiffPropPerEnt).append("\n");
-        sb.append("\t\tnum of different values per prop: ").append(testDiffValuesPerProf).append("\n");
-        sb.append("\t\tPROBABILITY of conflicts (%): ").append(getProbabilityOfConflicts()).append("\n");
+        sb.append("\t\tconflicts flag: ").append(testConflictsFlag).append("\n");
+        if( testConflictsFlag.equals("yes") ) {
+            sb.append("\t\tnum of different entities: ").append(testDiffEnt).append("\n");
+            sb.append("\t\tnum of different prop per ent: ").append(testDiffPropPerEnt).append("\n");
+            sb.append("\t\tnum of different values per prop: ").append(testDiffValuesPerProf).append("\n");
+            sb.append("\t\tPROBABILITY of conflicts (%): ");
+            for(Iterator it=testThreadNumber.iterator(); it.hasNext(); ) {
+                int no_threads = (int)(it.next());
+                sb.append(no_threads).append("th->").append(getProbabilityOfConflicts(no_threads))
+                        .append("  ");   
+            }
+            sb.append("\n");
+        }
         return sb.toString();
     }
     

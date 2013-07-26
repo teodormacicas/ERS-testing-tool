@@ -23,6 +23,8 @@ public class Server extends Machine
      private String faultTolerant;
      // number of max retrials in case of failure
      private int restartAttempts;
+     
+     private String testName;
     
      public Server() {
         this.serverListenIp = "0.0.0.0";
@@ -226,5 +228,21 @@ public class Server extends Machine
      */
     public int getGraphSnapshot() { 
         return this.serverSnapshotGraph;
+    }
+    
+    /**
+     * 
+     * @param testName 
+     */
+    public void setTestName(String testName) { 
+        this.testName = testName;
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public String getTestName() { 
+        return this.testName;
     }
 }

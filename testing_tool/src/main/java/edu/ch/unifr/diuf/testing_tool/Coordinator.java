@@ -1,10 +1,12 @@
 package edu.ch.unifr.diuf.testing_tool;
 
+import java.io.File;
 import net.schmizz.sshj.transport.TransportException;
 import org.apache.commons.configuration.ConfigurationException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -131,57 +133,77 @@ public class Coordinator
         System.out.println("[INFO] ALL machines checked and they are in a runnable state.");
         System.out.println("[INFO] Starting the threads for checking connectivity, status and running PIDs. "
                             + "NOTE: if public-key auth is used then this may take some time ...");
+        
         // now start all the other thread as the connectity at this point should be ok
         mm.startOtherThreads();
 
         // run tests
-        List<TestParams> testParamsList = mm.getTests();
+        List<TestParams> testParamsList = mm.getTests(); 
         Coordinator coord = new Coordinator();
 
         for(TestParams test: testParamsList) {
-            for (int i = 0; i < test.getTestNum(); i++) {
-                // set server related params
-                mm.getServer().setGraph(test.getTestServerGraphName());
-                mm.getServer().setGraphReset(test.getTestServerGraphReset());
-                mm.getServer().setReadCons(test.getTestReadCons());
-                mm.getServer().setWriteCons(test.getTestWriteCons());
-                mm.getServer().setTransLockGran(test.getTransLockGran());
-                mm.getServer().setReplFactor(test.getReplicationFactor());
-                
-                // set client related params
-                for(int j = 0; j < mm.getClientsNum(); j++) {
-                    //mm.getClientNo(j).setInputFilename(test.getTestInputFilename());
-                    mm.getClientNo(j).setNoThreads(test.getTestThreadNum());
-                    mm.getClientNo(j).setWarmupPeriod(test.getTestWarmupPer());
-                    mm.getClientNo(j).setRunningPeriod(test.getTestRunningPer());
-                    mm.getClientNo(j).setOperationType(test.getTestOperationType());
-                    mm.getClientNo(j).setOperationNum(test.getTestOperationNum());
-                    mm.getClientNo(j).setTransRetrials(test.getTestTransRetrials());
-                    mm.getClientNo(j).setDiffE(test.getDiffEnt());
-                    mm.getClientNo(j).setDiffPperE(test.getDiffPropPerEnt());
-                    mm.getClientNo(j).setDiffVperP(test.getDiffValuesPerProp());
-                }
-                StringBuilder sbTest = new StringBuilder("[INFO] Test with parameters: ");
-                
-                
-                sbTest.append(test.getTestServerGraphName()).append(" ").append(test.getTestServerGraphReset()).append(" ").
-                       append(test.getTestReadCons()).append(" ").append(test.getTestWriteCons()).append(" ").
-                       append(test.getTransLockGran()).append(" ").append(test.getReplicationFactor()).append(" ").
-                       append(test.getTestThreadNum()).append(" ").append(test.getTestRunningPer()).append(" ").
-                       append(test.getTestWarmupPer()).append(" ").
-                       append(test.getTestOperationType()).append(" ").append(test.getTestOperationNum()).append(" ").
-                       append(test.getTestTransRetrials());                        
-                System.out.println(sbTest.toString());
-                
-                 // before starting the clients, lets check if the data inputfile exists remotely
-                Client c = mm.checkClientsRemoteDatafiles();
-                if( c != null ) { 
-                    System.out.println("[FAIL] Client " + c.getId() + " " + c.getIpAddress() + 
-                            " lacks of the input filename " + Utils.getClientRemoteDataFilename(c));
-                    break;
-                }
-                coord.runClients(mm, sbTest.toString());
+            // delete here the output dir for this test (if there was a previous run with old files) 
+            String currentDir = new java.io.File( "." ).getCanonicalPath();
+            String testDir = currentDir+"/"+test.getTestName()+"/";
+            try {
+                Runtime.getRuntime().exec(new String[]{"/bin/bash","-c", "rm -r " + testDir}).waitFor();
+                Runtime.getRuntime().exec(new String[]{"/bin/bash","-c", "mkdir " + testDir}).waitFor();
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
             }
+            
+            // multiple thread numbers
+            for( Iterator it=test.getTestThreadNum().iterator(); it.hasNext(); ) {
+                int thread_num = (int)it.next();
+                // one test can be run multiple times 
+                for (int i = 0; i < test.getTestNum(); i++) {                
+                    // set server related params
+                    mm.getServer().setGraph(test.getTestServerGraphName());
+                    mm.getServer().setGraphReset(test.getTestServerGraphReset());
+                    mm.getServer().setReadCons(test.getTestReadCons());
+                    mm.getServer().setWriteCons(test.getTestWriteCons());
+                    mm.getServer().setTransLockGran(test.getTransLockGran());
+                    mm.getServer().setReplFactor(test.getReplicationFactor());
+                    mm.getServer().setTestName(test.getTestName());
+
+                    // set client related params
+                    for(int k = 0; k < mm.getClientsNum(); k++) {
+                        //mm.getClientNo(j).setInputFilename(test.getTestInputFilename());
+                        mm.getClientNo(k).setNoThreads(thread_num);
+                        mm.getClientNo(k).setWarmupPeriod(test.getTestWarmupPer());
+                        mm.getClientNo(k).setRunningPeriod(test.getTestRunningPer());
+                        mm.getClientNo(k).setOperationType(test.getTestOperationType());
+                        mm.getClientNo(k).setOperationNum(test.getTestOperationNum());
+                        mm.getClientNo(k).setTransRetrials(test.getTestTransRetrials());
+                        mm.getClientNo(k).setDiffE(test.getDiffEnt());
+                        mm.getClientNo(k).setDiffPperE(test.getDiffPropPerEnt());
+                        mm.getClientNo(k).setDiffVperP(test.getDiffValuesPerProp());
+                        mm.getClientNo(k).setConflictsFlag(test.getConflictsParameter());
+                    }
+                    StringBuilder sbTest = new StringBuilder("[INFO] Test with parameters: ");
+
+                    sbTest.append(test.getTestServerGraphName()).append(" ").append(test.getTestServerGraphReset()).append(" ").
+                           append(test.getTestReadCons()).append(" ").append(test.getTestWriteCons()).append(" ").
+                           append(test.getTransLockGran()).append(" ").append(test.getReplicationFactor()).append(" ").
+                           append(thread_num).append(" ").append(test.getTestRunningPer()).append(" ").
+                           append(test.getTestWarmupPer()).append(" ").append(test.getTestOperationType()).append(" ").
+                           append(test.getTestOperationNum()).append(" ").append(test.getTestTransRetrials());                        
+                    System.out.println(sbTest.toString());
+
+                     // before starting the clients, lets check if the data inputfile exists remotely
+                    Client c = mm.checkClientsRemoteDatafiles();
+                    if( c != null ) { 
+                        System.out.println("[FAIL] Client " + c.getId() + " " + c.getIpAddress() + 
+                                " lacks of the input filename " + Utils.getClientRemoteDataFilename(c));
+                        break;
+                    }
+                    coord.runClients(mm, sbTest.toString(), test.getFinalRestultFilename(), i);
+                }
+            }
+            // one test scenarion is done here, parse the output file 
+            Parser p = new Parser(testDir+test.getFinalRestultFilename(), testDir+"data-for-plot", 
+                    mm.getClientsNum(), test.getTestNum());
+            p.parseFile();
         }
         System.out.println("[INFO] Now join all threads ...");
         mm.joinAllThreads();
@@ -194,8 +216,10 @@ public class Coordinator
      * @param mm
      * @param testName 
      */
-    private void runClients(MachineManager mm, String testName) {
-        RunClient rc = new RunClient(mm, mm.getServer().getRestartAttempts(), testName);
+    private void runClients(MachineManager mm, String testName, 
+            String finalResultFilename, int testNo) {
+        RunClient rc = new RunClient(mm, mm.getServer().getRestartAttempts(), testName,
+                finalResultFilename, testNo);
         rc.start();
         if( mm.getServer().getFaultTolerant().equals("yes") ) {
             mm.startFaultTolerantThread(rc);
@@ -221,11 +245,16 @@ public class Coordinator
         private int no_retrials;
         private int status;
         private String testName;
+        private String resultFile;
+        private int testNo;
         
-        public RunClient(MachineManager mm, Integer retrials, String testName) {
+        public RunClient(MachineManager mm, Integer retrials, 
+                String testName, String finalResultFilename, int testNo) {
             this.mm = mm;
             this.no_retrials = retrials;
             this.testName = testName;
+            this.resultFile = finalResultFilename;
+            this.testNo = testNo;
         }
         
         public void run() {
@@ -289,8 +318,9 @@ public class Coordinator
                 }
                 System.out.println("[INFO] Client tests are done.");
 
-                System.out.println("[INFO] Now locally download the logs from the clients.");
-                mm.downloadAllLogs();
+                System.out.println("[INFO] Now locally download the logs from the clients. Final results to file "
+                        + resultFile);
+                mm.downloadAllLogs(resultFile, testNo);
                 System.out.println("[INFO] All the logs are downloaded. For further information "
                         + "please check them.");
             } 

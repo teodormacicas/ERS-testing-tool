@@ -27,6 +27,7 @@ public class Client extends Machine
     private int operationNum;
     private int transRetrials;
 
+    private String conflictsFlag;
     private int diffE; 
     private int diffPperE;
     private int diffVperP;
@@ -298,6 +299,22 @@ public class Client extends Machine
      */
     public int getLastLogModification() { 
         return this.lastLogAccessSec;
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public String getConflictsFlag() { 
+        return this.conflictsFlag;
+    }
+    
+    /**
+     * 
+     * @param flag 
+     */
+    public void setConflictsFlag(String flag) { 
+        this.conflictsFlag = flag;
     }
     
     /**
