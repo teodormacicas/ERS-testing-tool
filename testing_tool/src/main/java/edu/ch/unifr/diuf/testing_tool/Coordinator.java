@@ -159,7 +159,11 @@ public class Coordinator
                 for (int i = 0; i < test.getTestNum(); i++) {                
                     // set server related params
                     mm.getServer().setGraph(test.getTestServerGraphName());
-                    mm.getServer().setGraphReset(test.getTestServerGraphReset());
+                    if( i == test.getTestNum() - 1 && test.getTestServerGraphReset() == 1 )
+                        // this means 1 + delete graph at the end of test
+                        mm.getServer().setGraphReset(2);
+                    else
+                        mm.getServer().setGraphReset(test.getTestServerGraphReset());
                     mm.getServer().setReadCons(test.getTestReadCons());
                     mm.getServer().setWriteCons(test.getTestWriteCons());
                     mm.getServer().setTransLockGran(test.getTransLockGran());
@@ -204,6 +208,12 @@ public class Coordinator
             Parser p = new Parser(testDir+test.getFinalRestultFilename(), testDir+"data-for-plot", 
                     mm.getClientsNum(), test.getTestNum());
             p.parseFile();
+            try {
+                // make a pause inbetween tests
+                Thread.sleep(2000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
         }
         System.out.println("[INFO] Now join all threads ...");
         mm.joinAllThreads();
@@ -288,7 +298,7 @@ public class Coordinator
                 mm.deleteClientPreviouslyMessages();
              
                 // run the clients remotely
-                System.out.println("[INFO] START the clients ...  ");
+                System.out.println("[INFO] START the clients ... and wait some time ... ");
                 mm.startAllClients();
                 
                 // check if all clients are synchronized

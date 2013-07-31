@@ -12,6 +12,8 @@ import java.lang.management.ManagementFactory;
 import java.net.MalformedURLException;
 
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.semanticweb.yars.nx.Node;
 import org.semanticweb.yars.nx.Variable;
 
@@ -306,7 +308,7 @@ public class TransactionClient
 			StringBuilder transaction = createTransaction();
 			String urlParameters = "g="+graph_name+"&retries="+this.retrials+"&t="+transaction.toString();
 			try {
-				URL url = new URL(server_http_address+SERVER_TRANSACTION_SERVLET);
+                                URL url =  new URL(server_http_address+SERVER_TRANSACTION_SERVLET);
 				this.connection = (HttpURLConnection) url.openConnection();           
 				this.connection.setDoOutput(true);
 				this.connection.setDoInput(true);
@@ -403,21 +405,26 @@ public class TransactionClient
             changeReplicationFactor(repl_factor);
             
             // reset the graph if needed (only for insert)
-            if( reset_flag == 1 && operation_type == 0 ) {
-                    System.out.println("Delete and (re)create the graph " + graph_name);
-                    deleteGraph(graph_name);
-                    createNewGraph(graph_name);
+            if( reset_flag != 0 && operation_type == 0 ) {
+                    System.out.println("Truncate the graph " + graph_name);
+                    deleteGraph(graph_name, false);
             }
-            // create a snapshot if not insert (do not forget to restore it)
-            if( snapshot_flag == 1 && operation_type != 0 ) {
-                
-            }
+            System.out.println("Create the graph " + graph_name); 
+            createNewGraph(graph_name);
         }
         
         public void dbclear() { 
-            // restore the snapshot
-            if( snapshot_flag == 1 && operation_type != 0 ) {
-                
+            // if truncate was used so far and reset flag is set 
+            if( reset_flag == 2 && operation_type ==  0) {
+                    System.out.println("Delete the graph " + graph_name);
+                    deleteGraph(graph_name, true);
+                    
+                    System.out.println("Now sleep 5s to leave some time for deletion ... ");
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(TransactionClient.class.getName()).log(Level.SEVERE, null, ex);
+                    }
             }
         }
         
@@ -478,10 +485,15 @@ public class TransactionClient
 	}
 
         // delete an existing graph
-        public void deleteGraph(String graph) {
+        public void deleteGraph(String graph, boolean cleanup) {
                 HttpURLConnection connection;
                 try {
-                        URL url = new URL(server_http_address+SERVER_HANDLE_GRAPHS_SERVLET+"?g="+graph+"&f=y");
+                        URL url; 
+                        if( cleanup )
+                            url = new URL(server_http_address+SERVER_HANDLE_GRAPHS_SERVLET+"?g="+graph+"&f=y");
+                        else 
+                            url = new URL(server_http_address+SERVER_HANDLE_GRAPHS_SERVLET+"?g="+graph+"&f=y&truncate");
+                        
                         connection = (HttpURLConnection) url.openConnection();
                         connection.setDoOutput(true);
                         connection.setDoInput(true);
@@ -493,7 +505,8 @@ public class TransactionClient
                         String line;
                         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                         line = reader.readLine();
-                        //System.out.println(line);
+                        System.out.println(line);
+                        reader.close();
 
                         connection.disconnect();
                 } catch( MalformedURLException ex ) {
@@ -713,6 +726,9 @@ public class TransactionClient
 
                 TransactionClient tc = new TransactionClient();
 		tc.server_http_address = args[0]; 
+                if( tc.server_http_address.startsWith("http://134.21.")) { 
+                    tc.server_http_address = new String(tc.server_http_address+"/ers");
+                }
                 tc.graph_name = args[1];
                 tc.reset_flag = Integer.valueOf(args[2]);
                 tc.snapshot_flag = Integer.valueOf(args[3]);
@@ -754,7 +770,7 @@ public class TransactionClient
                 
                 tc.init();
                 // does this client initialize/setup the DB?
-                if( args[21] != null ) { 
+                if( args[21] != null && args[21].equals("yes") ) { 
                     tc.dbinit();
                 }
 
@@ -777,6 +793,7 @@ public class TransactionClient
                 // start threads to send 'operation_type' transaction for no_op.. times
 		tc.startThreads();
                 long start_time = 0;
+                
                 // wait to warmup before signaling the other threads to go ahead
                 try {
                         System.out.println("Threads have been started, but wait " + tc.warmup_period
