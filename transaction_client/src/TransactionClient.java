@@ -160,7 +160,10 @@ public class TransactionClient
                         }
                         if( counter_e > numDiffEnt ) { 
                             counter_e = 0; 
-                            ++carry;
+                            // do not increment carry when sending 'fullEntity' transactions 
+                            // by doing so it may send transactions to non-existing records
+                            if( !fullEntity )
+                                ++carry;
                         }
                         randomE = client_dec_id + "-" + thread_id + "-" + counter_e + "--" + carry;
                         randomP = client_dec_id + "-" + thread_id + "-" + counter_e
