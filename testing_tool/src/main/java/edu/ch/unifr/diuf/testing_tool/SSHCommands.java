@@ -191,6 +191,7 @@ public class SSHCommands
             sb.append("yes ");
             sb.append(client.getWorkingDirectory()).append(" "); 
             sb.append(client.getUUID()).append(" "); 
+            sb.append(client.getId()).append(" "); 
             sb.append(client.getConflictsFlag()).append(" ");
             sb.append(client.getDiffE()).append(" ");
             sb.append(client.getDiffPperE()).append(" ");

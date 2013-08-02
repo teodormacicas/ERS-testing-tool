@@ -40,6 +40,7 @@ public class TransactionClient
         private String operation_name;
         private String working_dir;
         private String client_id;
+        private Integer client_dec_id;
         
         private String conflictFlag;
         private int numDiffEnt; 
@@ -156,10 +157,10 @@ public class TransactionClient
                                 }
                             }
                         }
-                        randomE = client_id + "-" + thread_id + "-" + counter_e;
-                        randomP = client_id + "-" + thread_id + "-" + counter_e
+                        randomE = client_dec_id + "-" + thread_id + "-" + counter_e;
+                        randomP = client_dec_id + "-" + thread_id + "-" + counter_e
                                 + "-" + counter_p;
-                        randomV = client_id + "-" + thread_id + "-" + counter_e
+                        randomV = client_dec_id + "-" + thread_id + "-" + counter_e
                                 + "-" + counter_p + "-" + counter_v;
                     }
                     n[0] = new Variable("eeeeeeeeeeeeeeeeeeeeee"+randomE);
@@ -687,7 +688,7 @@ public class TransactionClient
         }
 
 	public static void main(String[] args) throws IOException, InterruptedException { 
-		if( args.length < 21 ) {
+		if( args.length < 22 ) {
 			System.err.println("Usage: \n" +
                                            "1. server http address \n"+
                                            "2. graph name \n" +
@@ -707,12 +708,13 @@ public class TransactionClient
                                            "14. number of retrials (if transaction conficts)\n" + 
                                            "15. distributed mode flag (yes/no); NOTE: if yes, the following parameters are used\n" +
                                            "16. working directory (needed to run remote ssh commands)\n" +
-                                           "17. client ID (also used by reomte ssh commands)\n" +
-                                           "18. conflicts flag (if no, the following params are not used)\n" +  
-                                           "19. number different entities \n" +
-                                           "20. number different properties per entity \n" +
-                                           "21. number different values per property \n" +
-                                           "22. INIT FLAG (at most 1client must use this flag; it resets consistency, graph and others)");
+                                           "17. client hexa ID (used by reomte ssh commands)\n" +
+                                           "18. client deci ID (used by data generator)\n" +
+                                           "19. conflicts flag (if no, the following params are not used)\n" +  
+                                           "20. number different entities \n" +
+                                           "21. number different properties per entity \n" +
+                                           "22. number different values per property \n" +
+                                           "23. INIT FLAG (at most 1client must use this flag; it resets consistency, graph and others)");
 			System.exit(1);
 		}
                 //IMPORTANT FOR TESTING TOOL; DO NOT DELETE!
@@ -763,15 +765,16 @@ public class TransactionClient
                     System.out.println("Distributed mode is on, thus use synch mechanism ... ");
                     tc.working_dir = args[15];
                     tc.client_id = args[16];
+                    tc.client_dec_id = Integer.valueOf(args[17]);
                 }
-                tc.conflictFlag = args[17];
-                tc.numDiffEnt = ( Integer.valueOf(args[18]) < 1 ) ? 1 : Integer.valueOf(args[18]);
-                tc.numDiffPropPerEnt = ( Integer.valueOf(args[19]) < 1 ) ? 1 : Integer.valueOf(args[19]);
-                tc.numDiffValuePerProp = ( Integer.valueOf(args[20]) < 1 ) ? 1 : Integer.valueOf(args[20]);
+                tc.conflictFlag = args[18];
+                tc.numDiffEnt = ( Integer.valueOf(args[19]) < 1 ) ? 1 : Integer.valueOf(args[19]);
+                tc.numDiffPropPerEnt = ( Integer.valueOf(args[20]) < 1 ) ? 1 : Integer.valueOf(args[20]);
+                tc.numDiffValuePerProp = ( Integer.valueOf(args[21]) < 1 ) ? 1 : Integer.valueOf(args[21]);
                 
                 tc.init();
                 // does this client initialize/setup the DB?
-                if( args[21] != null && args[21].equals("yes") ) { 
+                if( args[22] != null && args[22].equals("yes") ) { 
                     tc.dbinit();
                 }
 
@@ -824,7 +827,7 @@ public class TransactionClient
                 System.out.println("\nStop threads and gather statistics ");
 		tc.joinThreads();
 
-                if( args[21] != null && args[21].equals("yes") ) { 
+                if( args[22] != null && args[22].equals("yes") ) { 
                     tc.dbclear();
                 }
                 
