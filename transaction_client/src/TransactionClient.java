@@ -136,7 +136,7 @@ public class TransactionClient
                         this.start_collection_res_time = System.currentTimeMillis();
                 }
 
-                private Node[] getRandomNode(boolean deleteFullEntity) { 
+                private Node[] getRandomNode(boolean fullEntity) { 
                     String randomE, randomP, randomV;
                     Node[] n = new Node[3];
                     if( conflictFlag.equals("yes") ) {
@@ -145,7 +145,7 @@ public class TransactionClient
                         randomV = String.valueOf(random_gen.nextInt(numDiffValuePerProp));
                     }
                     else { 
-                        if( deleteFullEntity ) 
+                        if( fullEntity ) 
                             ++counter_e;
                         else {
                             if( ++counter_v > VperP ) {
@@ -222,7 +222,7 @@ public class TransactionClient
                 }
 
                 private String createAnCopyShallow(String graph_src, String graph_dest) {
-                        Node[] random_node = getRandomNode(false);
+                        Node[] random_node = getRandomNode(true);
                         // create one shallow copy here
                         StringBuilder sb = new StringBuilder();
                         sb.append("shallow_clone(");
@@ -236,7 +236,7 @@ public class TransactionClient
                 }
 
                 private String createAnCopyDeep(String graph_src, String graph_dest) {
-			Node[] random_node = getRandomNode(false);
+			Node[] random_node = getRandomNode(true);
 			// create one deep copy 
 			StringBuilder sb = new StringBuilder(); 
 			sb.append("deep_clone(");
