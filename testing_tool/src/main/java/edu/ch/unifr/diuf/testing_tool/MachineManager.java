@@ -566,12 +566,18 @@ public class MachineManager
             tp.setTestName(name);
             
             // server related params
-            String serverGraphName = testConfig.getString("server.graph.name");
-            if( serverGraphName == null || serverGraphName.isEmpty() ) { 
-                throw new ConfigurationException("Graph name for test " + nameWithExtension 
+            String serverGraphSourceName = testConfig.getString("server.graph.source");
+            if( serverGraphSourceName == null || serverGraphSourceName.isEmpty() ) { 
+                throw new ConfigurationException("Source graph name for test " + nameWithExtension 
                         + " is null or empty.");
             }
-            tp.setTestServerGraphName(serverGraphName);
+            String serverGraphDestName = testConfig.getString("server.graph.dest");
+            if( serverGraphDestName == null || serverGraphDestName.isEmpty() ) { 
+                throw new ConfigurationException("Dest graph name for test " + nameWithExtension 
+                        + " is null or empty.");
+            }
+            tp.setTestServerSourceGraphName(serverGraphSourceName);
+            tp.setTestServerDestGraphName(serverGraphDestName);
             tp.setTestServerGraphReset(testConfig.getInt("server.graph.reset", 0));
             tp.setGraphSnapshot(testConfig.getInt("server.graph.snapshot", 0));
             tp.setTestReadCons(testConfig.getString("server.read.consistency", "one" ));

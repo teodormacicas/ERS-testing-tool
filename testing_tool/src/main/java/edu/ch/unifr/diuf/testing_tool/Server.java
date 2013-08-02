@@ -15,7 +15,8 @@ public class Server extends Machine
      private int serverReplicationFactor; 
      
      // each test will use one graph
-     private String serverGraph;
+     private String serverSourceGraph;
+     private String serverDestGraph;
      private int serverResetGraph;
      private int serverSnapshotGraph;
      
@@ -122,16 +123,32 @@ public class Server extends Machine
      * 
      * @param graph 
      */
-    public void setGraph(String graph) { 
-        this.serverGraph = graph;
+    public void setSourceGraph(String graph) { 
+        this.serverSourceGraph = graph;
     }
     
     /**
      * 
      * @return 
      */
-    public String getGraph() { 
-        return this.serverGraph;
+    public String getSourceGraph() { 
+        return this.serverSourceGraph;
+    }
+   
+    /**
+     * 
+     * @param graph 
+     */
+    public void setDestGraph(String graph) { 
+        this.serverDestGraph = graph;
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public String getDestGraph() { 
+        return this.serverDestGraph;
     }
     
     /**

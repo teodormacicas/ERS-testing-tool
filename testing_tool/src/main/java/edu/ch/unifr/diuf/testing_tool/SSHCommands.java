@@ -173,8 +173,9 @@ public class SSHCommands
             sb.append(Utils.getClientProgramRemoteFilename(client));
             sb.append(" http://").append(server.getServerHTTPListenAddress()).append(":")
                     .append(server.getServerHttpPort()).append(" ");
-            String escapedGraph = server.getGraph().replace("<", "\\<").replace(">", "\\>");
-            sb.append(escapedGraph).append(" ");
+            String escapedSourceGraph = server.getSourceGraph().replace("<", "\\<").replace(">", "\\>");
+            String escapedDestGraph = server.getDestGraph().replace("<", "\\<").replace(">", "\\>");
+            sb.append(escapedSourceGraph).append("/").append(escapedDestGraph).append(" ");
             sb.append(server.getGraphReset()).append(" "); 
             sb.append(server.getGraphSnapshot()).append(" "); 
             sb.append(server.getReadCons()).append(" ");

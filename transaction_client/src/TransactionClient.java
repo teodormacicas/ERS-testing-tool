@@ -22,7 +22,8 @@ public class TransactionClient
 {
 	private String input_filename;
         private String server_http_address;
-        private String graph_name;
+        private String source_graph;
+        private String dest_graph;
         private int reset_flag;
         private int snapshot_flag;
         private String read_cons;
@@ -191,7 +192,7 @@ public class TransactionClient
 			sb.append("<"+random_node[1]+">").append(",");
 			// new value
 			sb.append("<"+random_node[2]+">").append(",");
-			sb.append(graph_name).append(");");
+			sb.append(source_graph).append(");");
 			return sb.toString();
 		}
                 
@@ -208,7 +209,7 @@ public class TransactionClient
 			// new value
 			//sb.append("<"+random_node[2]+">").append(",");
 			sb.append("<"+random_node[2]+">").append(",");
-			sb.append(graph_name);
+			sb.append(source_graph);
 		        sb.append(",");
 			// old value of the update
 			sb.append("<"+random_node[2]+">").append(");");
@@ -226,45 +227,45 @@ public class TransactionClient
                         sb.append("<"+random_node[0]+">").append(",");
                         sb.append("<"+random_node[1]+">").append(",");
                         sb.append("<"+random_node[2]+">").append(",");
-                        sb.append(graph_name).append(");");
+                        sb.append(source_graph).append(");");
                         return sb.toString();
                 }
 
-                private String createAnCopyShallow(String graph_src, String graph_dest) {
+                private String createAnCopyShallow() {
                         Node[] random_node = getRandomNode(true);
                         // create one shallow copy here
                         StringBuilder sb = new StringBuilder();
                         sb.append("shallow_clone(");
                         sb.append("<"+random_node[0]+">").append(",");
-                        sb.append(graph_src).append(",");
+                        sb.append(source_graph).append(",");
                         // new entity
                         sb.append("<NEW_"+random_node[2]+">").append(",");
-                        sb.append(graph_dest);
+                        sb.append(dest_graph);
                         sb.append(");");
                         return sb.toString();
                 }
 
-                private String createAnCopyDeep(String graph_src, String graph_dest) {
+                private String createAnCopyDeep() {
 			Node[] random_node = getRandomNode(true);
 			// create one deep copy 
 			StringBuilder sb = new StringBuilder(); 
 			sb.append("deep_clone(");
 			sb.append("<"+random_node[0]+">").append(",");
-			sb.append(graph_src).append(",");
+			sb.append(source_graph).append(",");
 			// new entity
 			sb.append("<NEW_"+random_node[2]+">").append(",");
-			sb.append(graph_dest);
+			sb.append(dest_graph);
 			sb.append(");");
 			return sb.toString();
 		}
 
-                private String createDeleteEntity(String graph_src) {
+                private String createDeleteEntity() {
 			Node[] random_node = getRandomNode(true);
 			// create one deep copy 
 			StringBuilder sb = new StringBuilder(); 
 			sb.append("delete_all(");
 			sb.append("<"+random_node[0]+">").append(",");
-			sb.append(graph_src);
+			sb.append(source_graph);
 			sb.append(");");
 			return sb.toString();
 		}
@@ -293,15 +294,13 @@ public class TransactionClient
                                                 sb.append(createADelete(1));
                                                 break;
                                         case 6: // entity shallow copy
-                                                sb.append(createAnCopyShallow(graph_name, 
-                                                        graph_name));
+                                                sb.append(createAnCopyShallow());
                                                 break;
                                         case 7: // entity deep copy
-                                                sb.append(createAnCopyDeep(graph_name, 
-                                                        graph_name));
+                                                sb.append(createAnCopyDeep());
                                                 break;
                                         case 8: // entity full delete
-                                                sb.append(createDeleteEntity(graph_name));
+                                                sb.append(createDeleteEntity());
                                                 break;
                                         default:
                                                 break;
@@ -315,7 +314,7 @@ public class TransactionClient
 
 		private void sendTransaction() { 
 			StringBuilder transaction = createTransaction();
-			String urlParameters = "g="+graph_name+"&retries="+this.retrials+"&t="+transaction.toString();
+			String urlParameters = "g="+source_graph+"&retries="+this.retrials+"&t="+transaction.toString();
 			try {
                                 URL url =  new URL(server_http_address+SERVER_TRANSACTION_SERVLET);
 				this.connection = (HttpURLConnection) url.openConnection();        
@@ -416,18 +415,21 @@ public class TransactionClient
             
             // reset the graph if needed (only for insert)
             if( (reset_flag == 1 || reset_flag == 2) && operation_type == 0 ) {
-                    System.out.println("Truncate the graph " + graph_name);
-                    deleteGraph(graph_name, false);
+                    System.out.println("Truncate the graph " + source_graph);
+                    deleteGraph(source_graph, false);
             }
-            System.out.println("Create the graph " + graph_name); 
-            createNewGraph(graph_name);
+            System.out.println("Create the source graph " + source_graph); 
+            createNewGraph(source_graph);
+            deleteGraph(dest_graph, true);
+            System.out.println("Create the dest graph " + dest_graph); 
+            createNewGraph(dest_graph);
         }
         
         public void dbclear() { 
             // if truncate and deletion was is meant
             if( reset_flag == 2 && operation_type ==  0) {
-                    System.out.println("Delete the graph " + graph_name);
-                    deleteGraph(graph_name, true);
+                    System.out.println("Delete the graph " + source_graph);
+                    deleteGraph(source_graph, true);
                     
                     System.out.println("Now sleep 5s to leave some time for deletion ... ");
                     try {
@@ -699,7 +701,7 @@ public class TransactionClient
 		if( args.length < 22 ) {
 			System.err.println("Usage: \n" +
                                            "1. server http address \n"+
-                                           "2. graph name \n" +
+                                           "2. source graph/dest graph (both separated by /) \n" +
                                            "3. reset graph (0:do nothing, 1:delete&create)\n" +
                                            "4. snashot graph (0:do nothing, 1:delete&create)\n" +
                                            "5. read consistency (one, two, three, quorum, all)\n" + 
@@ -740,7 +742,8 @@ public class TransactionClient
                 if( tc.server_http_address.startsWith("http://134.21.")) { 
                     tc.server_http_address = new String(tc.server_http_address+"/ers");
                 }
-                tc.graph_name = args[1];
+                tc.source_graph = args[1].substring(0, args[1].indexOf("/")-1);
+                tc.dest_graph = args[1].substring(args[1].indexOf("/"));
                 tc.reset_flag = Integer.valueOf(args[2]);
                 tc.snapshot_flag = Integer.valueOf(args[3]);
                 
@@ -818,6 +821,7 @@ public class TransactionClient
                         System.out.println("Signal threads that now they can record statistical data");
                         tc.startCollectingResults();
                         start_time = System.currentTimeMillis();
+                        
                         // now wait the given period for the threads to run transactions before joining them
                         System.out.println("Leave threads to send transactions for " 
                                 + tc.time_run_per_th + " seconds ... ");

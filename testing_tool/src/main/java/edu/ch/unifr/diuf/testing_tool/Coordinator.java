@@ -158,7 +158,8 @@ public class Coordinator
                 // one test can be run multiple times 
                 for (int i = 0; i < test.getTestNum(); i++) {                
                     // set server related params
-                    mm.getServer().setGraph(test.getTestServerGraphName());
+                    mm.getServer().setSourceGraph(test.getTestServerSourceGraphName());
+                    mm.getServer().setDestGraph(test.getTestServerDestGraphName());
                     mm.getServer().setGraphReset(test.getTestServerGraphReset());
                     mm.getServer().setReadCons(test.getTestReadCons());
                     mm.getServer().setWriteCons(test.getTestWriteCons());
@@ -182,7 +183,8 @@ public class Coordinator
                     }
                     StringBuilder sbTest = new StringBuilder("[INFO] Test with parameters: ");
 
-                    sbTest.append(test.getTestServerGraphName()).append(" ").append(test.getTestServerGraphReset()).append(" ").
+                    sbTest.append(test.getTestServerSourceGraphName()).append("/").append(test.getTestServerDestGraphName()).
+                           append(test.getTestServerGraphReset()).append(" ").
                            append(test.getTestReadCons()).append(" ").append(test.getTestWriteCons()).append(" ").
                            append(test.getTransLockGran()).append(" ").append(test.getReplicationFactor()).append(" ").
                            append(thread_num).append(" ").append(test.getTestRunningPer()).append(" ").

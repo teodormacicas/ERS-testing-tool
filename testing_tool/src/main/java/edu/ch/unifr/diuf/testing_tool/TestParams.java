@@ -10,7 +10,8 @@ public class TestParams
     public int numClients;
     public String testId;
     
-    private String testServerGraphName;
+    private String testServerSourceGraphName;
+    private String testServerDestGraphName;
     private int testServerGraphReset;
     private int testServerGraphSnaphshot;
     private String testServerReadCons; 
@@ -45,12 +46,20 @@ public class TestParams
         return this.numClients;
     }
     
-    public String getTestServerGraphName() { 
-        return this.testServerGraphName;
+    public String getTestServerSourceGraphName() { 
+        return this.testServerSourceGraphName;
     }
     
-    public void setTestServerGraphName(String graphName) { 
-        this.testServerGraphName = graphName;
+    public void setTestServerSourceGraphName(String graphName) { 
+        this.testServerSourceGraphName = graphName;
+    }
+    
+    public String getTestServerDestGraphName() { 
+        return this.testServerDestGraphName;
+    }
+    
+    public void setTestServerDestGraphName(String graphName) { 
+        this.testServerDestGraphName = graphName;
     }
     
     public int getTestServerGraphReset() { 
@@ -216,7 +225,8 @@ public class TestParams
     
     public String toString() { 
         StringBuilder sb = new StringBuilder();
-        sb.append("\tSERVER PARAMS: ").append(testServerGraphName).append(" ");
+        sb.append("\tSERVER PARAMS: ").append(testServerSourceGraphName)
+                .append("/").append(testServerDestGraphName).append(" ");
         sb.append(testServerGraphReset).append(" ");
         sb.append(testServerGraphSnaphshot).append(" ").append(testServerReadCons);
         sb.append(" ").append(testServerWriteCons).append(" ").append(testServerTransLockingGran);
