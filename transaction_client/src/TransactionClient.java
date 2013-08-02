@@ -162,11 +162,11 @@ public class TransactionClient
                             counter_e = 0; 
                             ++carry;
                         }
-                        randomE = client_dec_id + "-" + thread_id + "-" + counter_e + "+" + carry;
+                        randomE = client_dec_id + "-" + thread_id + "-" + counter_e + "--" + carry;
                         randomP = client_dec_id + "-" + thread_id + "-" + counter_e
-                                + "-" + counter_p + "+" + carry;
+                                + "-" + counter_p + "--" + carry;
                         randomV = client_dec_id + "-" + thread_id + "-" + counter_e
-                                + "-" + counter_p + "-" + counter_v + "+" + carry;
+                                + "-" + counter_p + "-" + counter_v + "--" + carry;
                     }
                     n[0] = new Variable("eeeeeeeeeeeeeeeeeeeeee"+randomE);
                     n[1] = new Variable("pppppppppppppppppppppp"+randomP);
