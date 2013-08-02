@@ -202,6 +202,10 @@ public class Coordinator
                         break;
                     }
                     coord.runClients(mm, sbTest.toString(), test.getFinalRestultFilename(), i);
+                    try { 
+                        System.out.println("Sleep 10s in between each test ... ");
+                        Thread.sleep(10000);
+                    } catch( InterruptedException ex ) { } 
                 }
             }
             // one test scenarion is done here, parse the output file 
