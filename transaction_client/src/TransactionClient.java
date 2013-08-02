@@ -309,14 +309,15 @@ public class TransactionClient
 			String urlParameters = "g="+graph_name+"&retries="+this.retrials+"&t="+transaction.toString();
 			try {
                                 URL url =  new URL(server_http_address+SERVER_TRANSACTION_SERVLET);
-				this.connection = (HttpURLConnection) url.openConnection();           
+				this.connection = (HttpURLConnection) url.openConnection();        
 				this.connection.setDoOutput(true);
 				this.connection.setDoInput(true);
 				this.connection.setInstanceFollowRedirects(false); 
 				this.connection.setRequestMethod("POST"); 
 				this.connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
+                                this.connection.setRequestProperty("Connection", "Keep-Alive");
 				this.connection.setRequestProperty("charset", "utf-8");
-				this.connection.setUseCaches (false);
+				this.connection.setUseCaches(false);
 
 				this.connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
 				DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
@@ -405,7 +406,7 @@ public class TransactionClient
             changeReplicationFactor(repl_factor);
             
             // reset the graph if needed (only for insert)
-            if( reset_flag != 0 && operation_type == 0 ) {
+            if( (reset_flag == 1 || reset_flag == 2) && operation_type == 0 ) {
                     System.out.println("Truncate the graph " + graph_name);
                     deleteGraph(graph_name, false);
             }
@@ -414,7 +415,7 @@ public class TransactionClient
         }
         
         public void dbclear() { 
-            // if truncate was used so far and reset flag is set 
+            // if truncate and deletion was is meant
             if( reset_flag == 2 && operation_type ==  0) {
                     System.out.println("Delete the graph " + graph_name);
                     deleteGraph(graph_name, true);

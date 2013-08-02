@@ -159,11 +159,7 @@ public class Coordinator
                 for (int i = 0; i < test.getTestNum(); i++) {                
                     // set server related params
                     mm.getServer().setGraph(test.getTestServerGraphName());
-                    if( i == test.getTestNum() - 1 && test.getTestServerGraphReset() == 1 )
-                        // this means 1 + delete graph at the end of test
-                        mm.getServer().setGraphReset(2);
-                    else
-                        mm.getServer().setGraphReset(test.getTestServerGraphReset());
+                    mm.getServer().setGraphReset(test.getTestServerGraphReset());
                     mm.getServer().setReadCons(test.getTestReadCons());
                     mm.getServer().setWriteCons(test.getTestWriteCons());
                     mm.getServer().setTransLockGran(test.getTransLockGran());
