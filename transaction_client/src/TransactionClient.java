@@ -140,6 +140,7 @@ public class TransactionClient
                 private Node[] getRandomNode(boolean fullEntity) { 
                     String randomE, randomP, randomV;
                     Node[] n = new Node[3];
+                    int carry = 0;
                     if( conflictFlag.equals("yes") ) {
                         randomE = String.valueOf(random_gen.nextInt(numDiffEnt));
                         randomP = String.valueOf(random_gen.nextInt(numDiffPropPerEnt));
@@ -149,19 +150,23 @@ public class TransactionClient
                         if( fullEntity ) 
                             ++counter_e;
                         else {
-                            if( ++counter_v > VperP ) {
+                            if( ++counter_v > numDiffPropPerEnt ) {
                                 counter_v = 0; 
-                                if( ++counter_p > PperE ) {
+                                if( ++counter_p > numDiffValuePerProp ) {
                                     counter_p = 0;
                                     counter_e++;
                                 }
                             }
                         }
-                        randomE = client_dec_id + "-" + thread_id + "-" + counter_e;
+                        if( counter_e > numDiffEnt ) { 
+                            counter_e = 0; 
+                            ++carry;
+                        }
+                        randomE = client_dec_id + "-" + thread_id + "-" + counter_e + "+" + carry;
                         randomP = client_dec_id + "-" + thread_id + "-" + counter_e
-                                + "-" + counter_p;
+                                + "-" + counter_p + "+" + carry;
                         randomV = client_dec_id + "-" + thread_id + "-" + counter_e
-                                + "-" + counter_p + "-" + counter_v;
+                                + "-" + counter_p + "-" + counter_v + "+" + carry;
                     }
                     n[0] = new Variable("eeeeeeeeeeeeeeeeeeeeee"+randomE);
                     n[1] = new Variable("pppppppppppppppppppppp"+randomP);
