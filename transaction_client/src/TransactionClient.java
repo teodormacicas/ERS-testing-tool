@@ -511,6 +511,8 @@ public class TransactionClient
                         else 
                             url = new URL(server_http_address+SERVER_HANDLE_GRAPHS_SERVLET+"?g="+graph+"&f=y&truncate=y");
                         
+        System.out.println(" " + url.getPath() + " " + url.getQuery());
+                        
                         connection = (HttpURLConnection) url.openConnection();
                         connection.setDoOutput(true);
                         connection.setDoInput(true);
