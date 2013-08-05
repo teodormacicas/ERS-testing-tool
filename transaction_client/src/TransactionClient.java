@@ -509,7 +509,7 @@ public class TransactionClient
                         if( cleanup )
                             url = new URL(server_http_address+SERVER_HANDLE_GRAPHS_SERVLET+"?g="+graph+"&f=y");
                         else 
-                            url = new URL(server_http_address+SERVER_HANDLE_GRAPHS_SERVLET+"?g="+graph+"&f=y&truncate");
+                            url = new URL(server_http_address+SERVER_HANDLE_GRAPHS_SERVLET+"?g="+graph+"&f=y&truncate=y");
                         
                         connection = (HttpURLConnection) url.openConnection();
                         connection.setDoOutput(true);
