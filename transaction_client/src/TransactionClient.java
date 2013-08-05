@@ -421,21 +421,10 @@ public class TransactionClient
             System.out.println("Create the source graph " + source_graph); 
             createNewGraph(source_graph);
             
-            /*
-            // delete and create the destination
+            // truncate and create the destination
             deleteGraph(dest_graph, false);
             System.out.println("Create the dest graph " + dest_graph); 
-            createNewGraph(dest_graph); */
-            
-            
-            for( int i = 0; i<50; ++i ) { 
-                // delete and create the destination
-                deleteGraph(dest_graph, true);
-                System.out.println("Create the dest graph " + dest_graph); 
-                createNewGraph(dest_graph);
-                
-                System.out.println("!!!!!!!!!!!!!!!!! TRIAL " + i);
-            }
+            createNewGraph(dest_graph); 
         }
         
         public void dbclear() { 
