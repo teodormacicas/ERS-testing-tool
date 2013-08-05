@@ -421,11 +421,7 @@ public class TransactionClient
             System.out.println("Create the source graph " + source_graph); 
             createNewGraph(source_graph);
             // delete and create the destination
-            deleteGraph(dest_graph, true);
-            
-            System.out.println("Sleeps for 5sec before recreating the graph ... ");
-            Thread.sleep(5000);
-
+            deleteGraph(dest_graph, false);
             System.out.println("Create the dest graph " + dest_graph); 
             createNewGraph(dest_graph);
         }
@@ -510,8 +506,6 @@ public class TransactionClient
                             url = new URL(server_http_address+SERVER_HANDLE_GRAPHS_SERVLET+"?g="+graph+"&f=y");
                         else 
                             url = new URL(server_http_address+SERVER_HANDLE_GRAPHS_SERVLET+"?g="+graph+"&f=y&truncate=y");
-                        
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! " + url.getPath() + " " + url.getQuery());
                         
                         connection = (HttpURLConnection) url.openConnection();
                         connection.setDoOutput(true);
