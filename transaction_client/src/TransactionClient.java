@@ -405,7 +405,7 @@ public class TransactionClient
 		}*/
 	}
 	
-        public void dbinit() {
+        public void dbinit() throws InterruptedException {
             // change consistency
             changeReadWriteConsistency(read_cons, write_cons);
             // change transaction locking granularity 
@@ -422,6 +422,10 @@ public class TransactionClient
             createNewGraph(source_graph);
             // delete and create the destination
             deleteGraph(dest_graph, true);
+            
+            System.out.println("Sleeps for 5sec before recreating the graph ... ");
+            Thread.sleep(5000);
+
             System.out.println("Create the dest graph " + dest_graph); 
             createNewGraph(dest_graph);
         }
