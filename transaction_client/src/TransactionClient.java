@@ -742,8 +742,8 @@ public class TransactionClient
                 if( tc.server_http_address.startsWith("http://134.21.")) { 
                     tc.server_http_address = new String(tc.server_http_address+"/ers");
                 }
-                tc.source_graph = args[1].substring(0, args[1].indexOf("/")-1);
-                tc.dest_graph = args[1].substring(args[1].indexOf("/"));
+                tc.source_graph = args[1].substring(0, args[1].indexOf("/"));
+                tc.dest_graph = args[1].substring(args[1].indexOf("/")+1);
                 tc.reset_flag = Integer.valueOf(args[2]);
                 tc.snapshot_flag = Integer.valueOf(args[3]);
                 
