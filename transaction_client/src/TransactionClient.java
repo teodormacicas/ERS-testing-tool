@@ -420,6 +420,7 @@ public class TransactionClient
             }
             System.out.println("Create the source graph " + source_graph); 
             createNewGraph(source_graph);
+            // delete and create the destination
             deleteGraph(dest_graph, true);
             System.out.println("Create the dest graph " + dest_graph); 
             createNewGraph(dest_graph);
