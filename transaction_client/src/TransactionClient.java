@@ -138,14 +138,32 @@ public class TransactionClient
                         this.start_collection_res_time = System.currentTimeMillis();
                 }
 
-                private Node[] getRandomNode(boolean fullEntity) { 
+                private Node[] getRandomNode(boolean fullEntity, boolean insert) { 
                     String randomE, randomP, randomV;
                     Node[] n = new Node[3];
                     int carry = 0;
                     if( conflictFlag.equals("yes") ) {
-                        randomE = String.valueOf(random_gen.nextInt(numDiffEnt));
-                        randomP = String.valueOf(random_gen.nextInt(numDiffPropPerEnt));
-                        randomV = String.valueOf(random_gen.nextInt(numDiffValuePerProp));
+                        if( insert ) { 
+                            if( ++counter_v > numDiffPropPerEnt ) {
+                                counter_v = 0; 
+                                if( ++counter_p > numDiffValuePerProp ) {
+                                    counter_p = 0;
+                                    counter_e++;
+                                }
+                            }
+                            if( counter_e > numDiffEnt ) { 
+                                counter_e = 0; 
+                            }
+                            randomE = String.valueOf(counter_e);
+                            randomP = String.valueOf(counter_p);
+                            randomV = String.valueOf(counter_v);
+                        }
+                        
+                        else {
+                            randomE = String.valueOf(random_gen.nextInt(numDiffEnt));
+                            randomP = String.valueOf(random_gen.nextInt(numDiffPropPerEnt));
+                            randomV = String.valueOf(random_gen.nextInt(numDiffValuePerProp));
+                        }
                     }
                     else { 
                         if( fullEntity ) 
@@ -181,7 +199,11 @@ public class TransactionClient
                 
                 private String createAnInsert(Integer linkFlag) {
 			//Node[] random_node = input_triples.get(randomInt); 
-                        Node[] random_node = getRandomNode(false); 
+                        Node[] random_node;
+                        if( linkFlag == 0 ) 
+                            random_node = getRandomNode(false, true); 
+                        else
+                            random_node = getRandomNode(false, false); 
 			// create one insert ere
 			StringBuilder sb = new StringBuilder(); 
         		 if( linkFlag != 0 ) 
@@ -197,7 +219,7 @@ public class TransactionClient
 		}
                 
 		private String createAnUpdate(Integer linkFlag) { 
-                        Node[] random_node = getRandomNode(false);
+                        Node[] random_node = getRandomNode(false, false);
 			// create one update here
 			StringBuilder sb = new StringBuilder(); 
 		         if( linkFlag != 0 ) 
@@ -217,7 +239,7 @@ public class TransactionClient
 		}
 
                 private String createADelete(Integer linkFlag) {
-                        Node[] random_node = getRandomNode(false);
+                        Node[] random_node = getRandomNode(false, false);
                         // create one insert ere
                         StringBuilder sb = new StringBuilder();
                         if( linkFlag != 0 )
@@ -232,7 +254,7 @@ public class TransactionClient
                 }
 
                 private String createAnCopyShallow() {
-                        Node[] random_node = getRandomNode(true);
+                        Node[] random_node = getRandomNode(true, false);
                         // create one shallow copy here
                         StringBuilder sb = new StringBuilder();
                         sb.append("shallow_clone(");
@@ -246,7 +268,7 @@ public class TransactionClient
                 }
 
                 private String createAnCopyDeep() {
-			Node[] random_node = getRandomNode(true);
+			Node[] random_node = getRandomNode(true, false);
 			// create one deep copy 
 			StringBuilder sb = new StringBuilder(); 
 			sb.append("deep_clone(");
@@ -260,7 +282,7 @@ public class TransactionClient
 		}
 
                 private String createDeleteEntity() {
-			Node[] random_node = getRandomNode(true);
+			Node[] random_node = getRandomNode(true, false);
 			// create one deep copy 
 			StringBuilder sb = new StringBuilder(); 
 			sb.append("delete_all(");
