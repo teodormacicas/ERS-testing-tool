@@ -434,7 +434,8 @@ public class TransactionClient
             changeTransactionLockingGranularity(trans_lock_gran);
             // also change replication facotr 
             changeReplicationFactor(repl_factor);
-            
+            // change transaction support mode 
+            changeTransactionalSupport();
             
             // reset the graph if needed (only for insert)
             if( (reset_flag == 1 || reset_flag == 2) && operation_type == 0 ) {
@@ -686,10 +687,6 @@ public class TransactionClient
         }
         
         public void changeTransactionalSupport() {
-                if( transactionalSupport.equals("-") ) 
-                    // it means no changes
-                    return;
-                
                 HttpURLConnection connection;
                 String urlParameters = "trans_support="+transactionalSupport;
                 try {
@@ -786,7 +783,7 @@ public class TransactionClient
                                            "20. number different entities \n" +
                                            "21. number different properties per entity \n" +
                                            "22. number different values per property \n" +
-                                           "23. transactional support (zookeeper, default, -); last value means no change\n"  +
+                                           "23. transactional support (zookeeper, default);\n"  +
                                            "24. INIT FLAG (at most 1client must use this flag; it resets consistency, graph and others)");
 			System.exit(1);
 		}

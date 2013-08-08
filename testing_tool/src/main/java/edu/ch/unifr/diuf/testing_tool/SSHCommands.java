@@ -207,10 +207,8 @@ public class SSHCommands
             sb.append(client.getDiffVperP()).append(" ");
             if( server.getUseZookeeper() == 1 ) 
                 sb.append("zookeeper ");
-            else if ( server.getUseZookeeper() == -1 )
+            else 
                 sb.append("default ");    
-            else // normally it should have 0 value here 
-                sb.append("- ");
             
             if( client.getId() == 0 ) 
                 sb.append("yes ");
