@@ -172,13 +172,11 @@ public class SSHCommands
             sb.append("java -jar "); 
             sb.append(Utils.getClientProgramRemoteFilename(client));
             sb.append(" http://");
-
-System.out.println("SERVER USES ZOOKEEPER: " + server.getUseZookeeper());
             
             // if Zookeeper is used, then the transaction is sent to localhost
             if( server.getUseZookeeper() == 1 )
                 sb.append(client.getIpAddress()).append(":")
-                        .append(client.getPort());
+                        .append(client.getPort()).append(" ");
             else 
                 sb.append(server.getServerHTTPListenAddress()).append(":")
                         .append(server.getServerHttpPort()).append(" ");
