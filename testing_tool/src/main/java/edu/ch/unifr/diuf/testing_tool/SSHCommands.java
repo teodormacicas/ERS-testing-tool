@@ -176,7 +176,7 @@ public class SSHCommands
             // if Zookeeper is used, then the transaction is sent to localhost
             if( server.getUseZookeeper() == 1 )
                 sb.append(client.getIpAddress()).append(":")
-                        .append(client.getPort()).append(" ");
+                        .append(server.getServerHttpPort()).append(" ");
             else 
                 sb.append(server.getServerHTTPListenAddress()).append(":")
                         .append(server.getServerHttpPort()).append(" ");
