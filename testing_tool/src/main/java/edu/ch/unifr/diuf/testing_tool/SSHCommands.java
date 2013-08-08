@@ -171,8 +171,16 @@ public class SSHCommands
             StringBuilder sb = new StringBuilder();
             sb.append("java -jar "); 
             sb.append(Utils.getClientProgramRemoteFilename(client));
-            sb.append(" http://").append(server.getServerHTTPListenAddress()).append(":")
-                    .append(server.getServerHttpPort()).append(" ");
+            sb.append(" http://");
+                    
+            // if Zookeeper is used, then the transaction is sent to localhost
+            if( server.getUseZookeeper() == 1 )
+                sb.append(client.getIpAddress()).append(":")
+                        .append(client.getPort());
+            else 
+                sb.append(server.getServerHTTPListenAddress()).append(":")
+                        .append(server.getServerHttpPort()).append(" ");
+            
             String escapedSourceGraph = server.getSourceGraph().replace("<", "\\<").replace(">", "\\>");
             String escapedDestGraph = server.getDestGraph().replace("<", "\\<").replace(">", "\\>");
             sb.append(escapedSourceGraph).append("/").append(escapedDestGraph).append(" ");
@@ -197,6 +205,13 @@ public class SSHCommands
             sb.append(client.getDiffE()).append(" ");
             sb.append(client.getDiffPperE()).append(" ");
             sb.append(client.getDiffVperP()).append(" ");
+            if( server.getUseZookeeper() == 1 ) 
+                sb.append("zookeeper ");
+            else if ( server.getUseZookeeper() == -1 )
+                sb.append("default ");    
+            else // normally it should have 0 value here 
+                sb.append("- ");
+            
             if( client.getId() == 0 ) 
                 sb.append("yes ");
             else 

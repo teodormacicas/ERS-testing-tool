@@ -47,6 +47,7 @@ public class TransactionClient
         private int numDiffEnt; 
         private int numDiffPropPerEnt; 
         private int numDiffValuePerProp;
+        private String transactionalSupport;
    
 	private ArrayList<Node[]> input_triples;
 	private Thread[] client_threads;
@@ -158,7 +159,6 @@ public class TransactionClient
                             randomP = String.valueOf(counter_p);
                             randomV = String.valueOf(counter_v);
                         }
-                        
                         else {
                             randomE = String.valueOf(random_gen.nextInt(numDiffEnt));
                             randomP = String.valueOf(random_gen.nextInt(numDiffPropPerEnt));
@@ -435,6 +435,7 @@ public class TransactionClient
             // also change replication facotr 
             changeReplicationFactor(repl_factor);
             
+            
             // reset the graph if needed (only for insert)
             if( (reset_flag == 1 || reset_flag == 2) && operation_type == 0 ) {
                     System.out.println("Truncate the graph " + source_graph);
@@ -684,6 +685,43 @@ public class TransactionClient
                 }
         }
         
+        public void changeTransactionalSupport() {
+                if( transactionalSupport.equals("-") ) 
+                    // it means no changes
+                    return;
+                
+                HttpURLConnection connection;
+                String urlParameters = "trans_support="+transactionalSupport;
+                try {
+                        URL url = new URL(server_http_address+SERVER_SETUP_SERVLET);
+                        connection = (HttpURLConnection) url.openConnection();
+                        connection.setDoOutput(true);
+                        connection.setDoInput(true);
+                        connection.setInstanceFollowRedirects(false);
+                        connection.setRequestMethod("POST");
+                        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                        connection.setRequestProperty("charset", "utf-8");
+                        connection.setUseCaches (false);
+                        connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+                        
+                        DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
+                        wr.writeBytes(urlParameters);
+                        wr.flush();
+                        wr.close();
+
+                        String line;
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        line = reader.readLine();
+                        System.out.println("Change read and write consistency levels: "+line);
+                       
+                        connection.disconnect();
+                } catch( MalformedURLException ex ) {
+                        ex.printStackTrace();
+                } catch( IOException ex ) {
+                        ex.printStackTrace();
+                }
+        }
+        
         private static String getOperationName(Integer operation_type) {
                 String operation_name;
                 switch( operation_type ) {
@@ -748,10 +786,11 @@ public class TransactionClient
                                            "20. number different entities \n" +
                                            "21. number different properties per entity \n" +
                                            "22. number different values per property \n" +
-                                           "23. INIT FLAG (at most 1client must use this flag; it resets consistency, graph and others)");
+                                           "23. transactional support (zookeeper, default, -); last value means no change\n"  +
+                                           "24. INIT FLAG (at most 1client must use this flag; it resets consistency, graph and others)");
 			System.exit(1);
 		}
-                //IMPORTANT FOR TESTING TOOL; DO NOT DELETE!
+                //IMPORTANT FOR TESTING TOOL; DO NOT DELETE!( Integer.valueOf(args[22]) < 1 ) ? 1 : Integer.valueOf
                 String PID = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
                 System.out.println("PID: "+PID);
                 System.out.flush();
@@ -806,10 +845,11 @@ public class TransactionClient
                 tc.numDiffEnt = ( Integer.valueOf(args[19]) < 1 ) ? 1 : Integer.valueOf(args[19]);
                 tc.numDiffPropPerEnt = ( Integer.valueOf(args[20]) < 1 ) ? 1 : Integer.valueOf(args[20]);
                 tc.numDiffValuePerProp = ( Integer.valueOf(args[21]) < 1 ) ? 1 : Integer.valueOf(args[21]);
+                tc.transactionalSupport = args[22];
                 
                 tc.init();
                 // does this client initialize/setup the DB?
-                if( args[22] != null && args[22].equals("yes") ) { 
+                if( args[23] != null && args[23].equals("yes") ) { 
                     tc.dbinit();
                 }
 

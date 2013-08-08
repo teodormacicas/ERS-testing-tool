@@ -24,6 +24,7 @@ public class Server extends Machine
      private String faultTolerant;
      // number of max retrials in case of failure
      private int restartAttempts;
+     private int useZookeeper;
      
      private String testName;
     
@@ -245,6 +246,22 @@ public class Server extends Machine
      */
     public int getGraphSnapshot() { 
         return this.serverSnapshotGraph;
+    }
+    
+    /**
+     * 
+     * @param use 
+     */
+    public void setUseZookeeper(int use) { 
+        this.useZookeeper = use;
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public int getUseZookeeper() { 
+        return this.useZookeeper;
     }
     
     /**

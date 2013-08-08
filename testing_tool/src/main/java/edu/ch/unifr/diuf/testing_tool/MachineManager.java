@@ -455,6 +455,7 @@ public class MachineManager
         String serverListenHostPort = config.getString("server.listenHostPort");
         String serverFaultTolerant = config.getString("server.faultTolerant");
         String serverRestartAttempts = config.getString("server.restartAttempts");
+        String serverUseZookeeper = config.getString("server.zookeeper");
         StringTokenizer st = new StringTokenizer(serverListenHostPort, ":");
         if( !serverListenHostPort.contains(":") || st.countTokens() != 2 ) {
             throw new ConfigurationException("Parsing error of server.listenHostPort. "
@@ -476,6 +477,7 @@ public class MachineManager
                         + "Please pass integer value to this parameter.");
         }
         this.server.setRestartAttempts(Integer.valueOf(serverRestartAttempts));        
+        this.server.setUseZookeeper(Integer.valueOf(serverUseZookeeper));     
         
         
         // get clients program filename 
