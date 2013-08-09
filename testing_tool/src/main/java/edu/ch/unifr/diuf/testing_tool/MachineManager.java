@@ -892,7 +892,7 @@ public class MachineManager
                     localFilename, sshClients.get(c.getId()+1));
             
             Runtime.getRuntime().exec(new String[]{"/bin/bash", 
-                "-c", "tail -n1 " + localFilename + " >> " + currentDir+"/"+server.getTestName()+"/"+resultFile}).waitFor();
+                "-c", "tail -n1 " + localFilename + " >> " + currentDir+"/"+server.getFullTestName()+"/"+resultFile}).waitFor();
         }
         testNum++;
     }
