@@ -227,7 +227,7 @@ public class TestParams
     }
     
     public String getFinalRestultFilename() { 
-        return "final_result-"+testId+".data";
+        return "final_result-"+this.getTestName()+".data";
     }
     
     public String toString() { 
