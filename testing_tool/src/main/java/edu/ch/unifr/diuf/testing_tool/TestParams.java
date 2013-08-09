@@ -211,8 +211,15 @@ public class TestParams
         this.testConflictsFlag = param;
     }
     
-    public String getTestName() { 
+    // meaning with directory if any 
+    public String getFullTestName() { 
         return this.testId;
+    }
+    
+    public String getTestName() { 
+        if( this.testId.contains("/") ) 
+            return testId.substring(testId.indexOf("/")+1);
+        return testId;
     }
     
     public void setTestName(String name) { 

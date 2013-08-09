@@ -144,7 +144,7 @@ public class Coordinator
         for(TestParams test: testParamsList) {
             // delete here the output dir for this test (if there was a previous run with old files) 
             String currentDir = new java.io.File( "." ).getCanonicalPath();
-            String testDir = currentDir+"/"+test.getTestName()+"/";
+            String testDir = currentDir+"/"+test.getFullTestName()+"/";
             try {
                 Runtime.getRuntime().exec(new String[]{"/bin/bash","-c", "rm -r " + testDir}).waitFor();
                 Runtime.getRuntime().exec(new String[]{"/bin/bash","-c", "mkdir " + testDir}).waitFor();
@@ -165,7 +165,7 @@ public class Coordinator
                     mm.getServer().setWriteCons(test.getTestWriteCons());
                     mm.getServer().setTransLockGran(test.getTransLockGran());
                     mm.getServer().setReplFactor(test.getReplicationFactor());
-                    mm.getServer().setTestName(test.getTestName());
+                    mm.getServer().setTestName(test.getFullTestName());
 
                     // set client related params
                     for(int k = 0; k < mm.getClientsNum(); k++) {

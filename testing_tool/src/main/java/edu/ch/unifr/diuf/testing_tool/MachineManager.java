@@ -565,10 +565,7 @@ public class MachineManager
             Configuration testConfig = new PropertiesConfiguration(nameWithExtension);
             TestParams tp = new TestParams();
             tp.setNumClients(clients.size());
-            if( name.contains("/") )
-                tp.setTestName(name.substring(name.indexOf("/")+1));
-            else
-                tp.setTestName(name);
+            tp.setTestName(name);
             
             // server related params
             String serverGraphSourceName = testConfig.getString("server.graph.source");
