@@ -276,6 +276,14 @@ public class Server extends Machine
      * 
      * @return 
      */
+    public String getFullTestName() { 
+        return this.testName;
+    }
+    
+    /**
+     * 
+     * @return 
+     */
     public String getTestName() { 
         if( testName.contains("/") ) 
             return this.testName.substring(testName.indexOf("/")+1);

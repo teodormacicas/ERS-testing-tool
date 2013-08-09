@@ -565,7 +565,10 @@ public class MachineManager
             Configuration testConfig = new PropertiesConfiguration(nameWithExtension);
             TestParams tp = new TestParams();
             tp.setNumClients(clients.size());
-            tp.setTestName(name);
+            if( name.contains("/") )
+                tp.setTestName(name.substring(name.indexOf("/")+1));
+            else
+                tp.setTestName(name);
             
             // server related params
             String serverGraphSourceName = testConfig.getString("server.graph.source");
@@ -883,7 +886,7 @@ public class MachineManager
         int counter=-1;
         for(Iterator it=clients.iterator(); it.hasNext(); ) { 
             Client c = (Client)it.next();
-            String testRunDir = currentDir+"/"+server.getTestName()+"/"+testNo+"/";
+            String testRunDir = currentDir+"/"+server.getFullTestName()+"/"+testNo+"/";
             
             Runtime.getRuntime().exec(new String[]{"/bin/bash","-c", "mkdir " + testRunDir}).waitFor();
             
