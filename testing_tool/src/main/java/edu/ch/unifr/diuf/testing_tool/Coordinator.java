@@ -1,6 +1,5 @@
 package edu.ch.unifr.diuf.testing_tool;
 
-import java.io.File;
 import net.schmizz.sshj.transport.TransportException;
 import org.apache.commons.configuration.ConfigurationException;
 
@@ -28,7 +27,9 @@ public class Coordinator
             System.out.println("Parsing properties file ...");
             mm.parsePropertiesFile();
         }
-        catch( WrongIpAddressException|WrongPortNumberException|ClientNotProperlyInitException ex ) {
+        catch( WrongIpAddressException |
+               WrongPortNumberException|
+               ClientNotProperlyInitException ex ) {
             LOGGER.log(Level.SEVERE, "Error while setting up a machine. " + ex.getMessage());
             System.exit(1);
         }
@@ -165,6 +166,7 @@ public class Coordinator
                     mm.getServer().setWriteCons(test.getTestWriteCons());
                     mm.getServer().setTransLockGran(test.getTransLockGran());
                     mm.getServer().setReplFactor(test.getReplicationFactor());
+                    mm.getServer().setCheckMyWritesMode(test.getCheckMyWritesMode());
                     mm.getServer().setTestName(test.getFullTestName());
 
                     // set client related params
@@ -184,12 +186,13 @@ public class Coordinator
                     StringBuilder sbTest = new StringBuilder("[INFO] Test with parameters: ");
 
                     sbTest.append(test.getTestServerSourceGraphName()).append("/").append(test.getTestServerDestGraphName()).
-                           append(test.getTestServerGraphReset()).append(" ").
+                           append(" ").append(test.getTestServerGraphReset()).append(" ").
                            append(test.getTestReadCons()).append(" ").append(test.getTestWriteCons()).append(" ").
                            append(test.getTransLockGran()).append(" ").append(test.getReplicationFactor()).append(" ").
                            append(thread_num).append(" ").append(test.getTestRunningPer()).append(" ").
                            append(test.getTestWarmupPer()).append(" ").append(test.getTestOperationType()).append(" ").
-                           append(test.getTestOperationNum()).append(" ").append(test.getTestTransRetrials());                        
+                           append(test.getTestOperationNum()).append(" ").append(test.getTestTransRetrials()).append(" ").
+                           append(test.getCheckMyWritesMode());
                     System.out.println(sbTest.toString());
 
                      // before starting the clients, lets check if the data inputfile exists remotely
@@ -206,10 +209,13 @@ public class Coordinator
                     } catch( InterruptedException ex ) { }  */
                 }
             }
-            // one test scenarion is done here, parse the output file 
-            Parser p = new Parser(testDir+test.getFinalRestultFilename(), testDir+"data-for-plot", 
-                    mm.getClientsNum(), test.getTestNum());
-            p.parseFile();
+            // one test scenario is done here, parse the output file
+            Parser p = new Parser(testDir+test.getFinalRestultFilename(), 
+                    testDir+"data-for-plot.running", mm.getClientsNum(), test.getTestNum());
+            p.parseFileRunningStats();
+            Parser p_vers = new Parser(testDir+test.getFinalRestultFilename()+".vers",
+                    testDir+"data-for-plot.vers", mm.getClientsNum(), test.getTestNum());
+            p_vers.parseFileVersionsStats();
             try {
                 // make a pause inbetween tests
                 Thread.sleep(2000);

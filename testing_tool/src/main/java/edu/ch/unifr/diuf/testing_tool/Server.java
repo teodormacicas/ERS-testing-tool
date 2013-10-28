@@ -12,7 +12,8 @@ public class Server extends Machine
      private String serverReadCons; 
      private String serverWriteCons; 
      private String serverTransLockGran; 
-     private int serverReplicationFactor; 
+     private int serverReplicationFactor;
+     private String serverCheckMyWritesCons;
      
      // each test will use one graph
      private String serverSourceGraph;
@@ -24,7 +25,8 @@ public class Server extends Machine
      private String faultTolerant;
      // number of max retrials in case of failure
      private int restartAttempts;
-     private int useZookeeper;
+     // default, zookeeper or mvcc
+     private String txSupport;
      
      private String testName;
     
@@ -231,7 +233,23 @@ public class Server extends Machine
     public int getReplFactor() { 
         return this.serverReplicationFactor;
     }
-    
+
+    /**
+     *
+     * @param mode
+     */
+    public void setCheckMyWritesMode(String mode) {
+        this.serverCheckMyWritesCons = mode;
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public String getCheckMyWritesMode() {
+        return this.serverCheckMyWritesCons;
+    }
+
     /**
      * 
      * @param snapshot 
@@ -252,16 +270,16 @@ public class Server extends Machine
      * 
      * @param use 
      */
-    public void setUseZookeeper(int use) { 
-        this.useZookeeper = use;
+    public void setTxSupport(String txSupport) {
+        this.txSupport = txSupport;
     }
     
     /**
      * 
      * @return 
      */
-    public int getUseZookeeper() { 
-        return this.useZookeeper;
+    public String getTxSupport() {
+        return this.txSupport;
     }
     
     /**

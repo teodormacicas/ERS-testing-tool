@@ -30,6 +30,7 @@ public class TransactionClient
         private String write_cons;
         private String trans_lock_gran;
         private int repl_factor;
+        private String check_my_writes;
         private int no_threads;
         private int time_run_per_th;
         // after this timeout the results are gathered 
@@ -56,6 +57,7 @@ public class TransactionClient
         final public static String SERVER_TRANSACTION_SERVLET="/transaction";
         final public static String SERVER_HANDLE_GRAPHS_SERVLET="/graph";
         final public static String SERVER_SETUP_SERVLET="/setup";
+        final public static String SERVER_VERSIONS_STATS="/query_versions_stats";
 
         public static final String FILENAME_SUFFIX_READY_WARMUP = "-client-ready-for-warmup";
         public static final String FILENAME_SUFFIX_START_SENDING_REQUESTS = "-start-sending-requests";
@@ -144,16 +146,23 @@ public class TransactionClient
                     Node[] n = new Node[3];
                     int carry = 0;
                     if( conflictFlag.equals("yes") ) {
-                        if( insert ) { 
-                            if( ++counter_v > numDiffPropPerEnt ) {
-                                counter_v = 0; 
-                                if( ++counter_p > numDiffValuePerProp ) {
+                        if( insert ) {
+                            // change entity id for each operation if many
+                            if( no_op_per_t > 1 ) {
+                                ++counter_e;
+                                if( counter_e >= numDiffEnt ) {
+                                   counter_e = 0;
+                                }
+                            }
+                            if( ++counter_v >= numDiffPropPerEnt ) {
+                                counter_v = 0;
+                                if( ++counter_p >= numDiffValuePerProp ) {
                                     counter_p = 0;
                                     counter_e++;
                                 }
                             }
-                            if( counter_e > numDiffEnt ) { 
-                                counter_e = 0; 
+                            if( counter_e >= numDiffEnt ) {
+                                counter_e = 0;
                             }
                             randomE = String.valueOf(counter_e);
                             randomP = String.valueOf(counter_p);
@@ -294,34 +303,71 @@ public class TransactionClient
 
                 private StringBuilder createTransaction() {
                         StringBuilder sb = new StringBuilder();
-			sb.append("BEGIN;");
+			sb.append("BEGIN");
 			for( int i=0; i<no_op_per_t; ++i ) {
                                 switch( operation_type ) {
                                         case 0: //insert
+                                                // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
+                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                   sb.append("/IP-tx_client");
+                                                sb.append(";");
                                                 sb.append(createAnInsert(0));
                                                 break;
                                         case 1: // insert link
+                                                // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
+                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                   sb.append("/IL-tx_client");
+                                                sb.append(";");
                                                 sb.append(createAnInsert(1));
                                                 break;
                                         case 2: // update
+                                                // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
+                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                   sb.append("/UP-tx_client");
+                                                sb.append(";");
                                                 sb.append(createAnUpdate(0));
                                                 break;
                                         case 3: // update link
+                                                // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
+                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                   sb.append("/UL-tx_client");
+                                                sb.append(";");
                                                 sb.append(createAnUpdate(1));
                                                 break;
                                         case 4: // delete
+                                                // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
+                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                   sb.append("/DP-tx_client");
+                                                sb.append(";");
                                                 sb.append(createADelete(0));
                                                 break;
                                         case 5:
+                                                // delete link
+                                                // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
+                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                   sb.append("/DL-tx_client");
+                                                sb.append(";");
                                                 sb.append(createADelete(1));
                                                 break;
                                         case 6: // entity shallow copy
+                                                // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
+                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                   sb.append("/SC-tx_client");
+                                                sb.append(";");
                                                 sb.append(createAnCopyShallow());
                                                 break;
                                         case 7: // entity deep copy
+                                                // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
+                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                   sb.append("/DC-tx_client");
+                                                sb.append(";");
                                                 sb.append(createAnCopyDeep());
                                                 break;
                                         case 8: // entity full delete
+                                                // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
+                                                if(i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                   sb.append("/DE-tx_client");
+                                                sb.append(";");
                                                 sb.append(createDeleteEntity());
                                                 break;
                                         default:
@@ -435,12 +481,18 @@ public class TransactionClient
             // also change replication facotr 
             changeReplicationFactor(repl_factor);
             // change transaction support mode 
-            changeTransactionalSupport();
+            changeTransactionalSupport(transactionalSupport);
+            // change check-my-writes cons mode (valid only for MVCC)
+            changeCheckMyWritesMode(check_my_writes);
             
             // reset the graph if needed (only for insert)
             if( (reset_flag == 1 || reset_flag == 2) && operation_type == 0 ) {
                     System.out.println("Truncate the graph " + source_graph);
                     deleteGraph(source_graph, false);
+                    if( transactionalSupport.equalsIgnoreCase("mvcc") ) {
+                        // truncate the ERS_versions keyspace also
+                        deleteGraph("<ERS_versions>", false);
+                    }
             }
             System.out.println("Create the source graph " + source_graph); 
             createNewGraph(source_graph);
@@ -557,6 +609,8 @@ public class TransactionClient
         public void createNewGraph(String graph) {
                 HttpURLConnection connection;
                 String urlParameters = "g_id="+graph+"&g_p=<createdBy>&g_v=\"transaction_client\"";
+                if( transactionalSupport.equalsIgnoreCase("mvcc"))
+                    urlParameters +="&ver";
                 try {
                         URL url = new URL(server_http_address+SERVER_HANDLE_GRAPHS_SERVLET);
                         connection = (HttpURLConnection) url.openConnection();
@@ -676,7 +730,7 @@ public class TransactionClient
                         String line;
                         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                         line = reader.readLine();
-                        System.out.println("Change read and write consistency levels: "+line);
+                        System.out.println("Change replication factor to: "+line);
                        
                         connection.disconnect();
                 } catch( MalformedURLException ex ) {
@@ -685,10 +739,10 @@ public class TransactionClient
                         ex.printStackTrace();
                 }
         }
-        
-        public void changeTransactionalSupport() {
+
+        public void changeCheckMyWritesMode(String mode) {
                 HttpURLConnection connection;
-                String urlParameters = "trans_support="+transactionalSupport;
+                String urlParameters = "check_my_writes="+mode;
                 try {
                         URL url = new URL(server_http_address+SERVER_SETUP_SERVLET);
                         connection = (HttpURLConnection) url.openConnection();
@@ -700,7 +754,68 @@ public class TransactionClient
                         connection.setRequestProperty("charset", "utf-8");
                         connection.setUseCaches (false);
                         connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+
+                        DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
+                        wr.writeBytes(urlParameters);
+                        wr.flush();
+                        wr.close();
+
+                        String line;
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        line = reader.readLine();
+                        System.out.println("Change check my writes consistency mode: "+line);
+
+                        connection.disconnect();
+                } catch( MalformedURLException ex ) {
+                        ex.printStackTrace();
+                } catch( IOException ex ) {
+                        ex.printStackTrace();
+                }
+        }
+        
+        public String getVersionsStats(String keyspace) {
+                HttpURLConnection connection;
+                String output="";
+                String urlParameters = "graph="+keyspace;
+                try {
+                        URL url = new URL(server_http_address+SERVER_VERSIONS_STATS+"?"+urlParameters);
+                        connection = (HttpURLConnection) url.openConnection();
+                        connection.setInstanceFollowRedirects(false);
+                        connection.setRequestMethod("GET");
+                        connection.setUseCaches (false);
                         
+                        String line;
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        while(true) {
+                            line = reader.readLine();
+                            if( line == null )
+                                 break;
+                            output += line +"\n";
+                        }
+                        connection.disconnect();
+                } catch( MalformedURLException ex ) {
+                        ex.printStackTrace();
+                } catch( IOException ex ) {
+                        ex.printStackTrace();
+                }
+                return output;
+        }
+
+        public void changeTransactionalSupport(String txSupportMode) {
+                HttpURLConnection connection;
+                String urlParameters = "trans_support="+txSupportMode;
+                try {
+                        URL url = new URL(server_http_address+SERVER_SETUP_SERVLET);
+                        connection = (HttpURLConnection) url.openConnection();
+                        connection.setDoOutput(true);
+                        connection.setDoInput(true);
+                        connection.setInstanceFollowRedirects(false);
+                        connection.setRequestMethod("POST");
+                        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                        connection.setRequestProperty("charset", "utf-8");
+                        connection.setUseCaches (false);
+                        connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+
                         DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
                         wr.writeBytes(urlParameters);
                         wr.flush();
@@ -710,7 +825,7 @@ public class TransactionClient
                         BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                         line = reader.readLine();
                         System.out.println("Change read and write consistency levels: "+line);
-                       
+
                         connection.disconnect();
                 } catch( MalformedURLException ex ) {
                         ex.printStackTrace();
@@ -718,7 +833,7 @@ public class TransactionClient
                         ex.printStackTrace();
                 }
         }
-        
+
         private static String getOperationName(Integer operation_type) {
                 String operation_name;
                 switch( operation_type ) {
@@ -783,8 +898,9 @@ public class TransactionClient
                                            "20. number different entities \n" +
                                            "21. number different properties per entity \n" +
                                            "22. number different values per property \n" +
-                                           "23. transactional support (zookeeper, default);\n"  +
-                                           "24. INIT FLAG (at most 1client must use this flag; it resets consistency, graph and others)");
+                                           "23. transactional support (zookeeper, default, MVCC);\n"  +
+                                           "24. check my writes mode (on, off) -> valid only for MVCC\n" +
+                                           "25. INIT FLAG (at most 1client must use this flag; it resets consistency, graph and others)");
 			System.exit(1);
 		}
                 //IMPORTANT FOR TESTING TOOL; DO NOT DELETE!( Integer.valueOf(args[22]) < 1 ) ? 1 : Integer.valueOf
@@ -798,7 +914,8 @@ public class TransactionClient
 		System.out.println("");
 
                 TransactionClient tc = new TransactionClient();
-		tc.server_http_address = args[0]; 
+		tc.server_http_address = args[0];
+                // just a work around here :)
                 if( tc.server_http_address.startsWith("http://134.21.")) { 
                     tc.server_http_address = new String(tc.server_http_address+"/ers");
                 }
@@ -829,7 +946,6 @@ public class TransactionClient
                 }
 		System.out.println("Create transactions with " + tc.no_operations_per_transaction 
                         + " " + tc.operation_name + " per T");
-                
                 tc.working_dir="";
                 tc.client_id="-1";
                 if( tc.distr_flag !=null && ! tc.distr_flag.isEmpty() && tc.distr_flag.equals("yes") ) {
@@ -843,10 +959,11 @@ public class TransactionClient
                 tc.numDiffPropPerEnt = ( Integer.valueOf(args[20]) < 1 ) ? 1 : Integer.valueOf(args[20]);
                 tc.numDiffValuePerProp = ( Integer.valueOf(args[21]) < 1 ) ? 1 : Integer.valueOf(args[21]);
                 tc.transactionalSupport = args[22];
+                tc.check_my_writes = args[23];
                 
                 tc.init();
                 // does this client initialize/setup the DB?
-                if( args[23] != null && args[23].equals("yes") ) { 
+                if( args[24] != null && args[24].equals("yes") ) {
                     tc.dbinit();
                 }
 
@@ -921,6 +1038,8 @@ public class TransactionClient
                 System.out.println("No threads,Total time, total trans, conflicts, aborted, successful rate/sec, no retrials");
                 System.out.println(tc.no_threads + " " + total_time + " " + total_trans + " " + conflicts + " " + aborted + " " +
                         ((double)tc.total_successful/total_time*1000) + " "  + tc.no_retrials);
+                System.out.println("Versions stats: ");
+                System.out.println(tc.getVersionsStats(tc.dest_graph));
                 
                 if( tc.distr_flag !=null && ! tc.distr_flag.isEmpty() && tc.distr_flag.equals("yes") ) {
                     // as the threads are finished, signal it again with a new empty file

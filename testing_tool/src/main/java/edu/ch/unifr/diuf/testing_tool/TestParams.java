@@ -18,6 +18,7 @@ public class TestParams
     private String testServerWriteCons; 
     private String testServerTransLockingGran; 
     private int testServerReplicationFactor;
+    private String testServerCheckMyWritesCons;
     
     private int testNum;
     private List testThreadNumber;
@@ -109,7 +110,15 @@ public class TestParams
     public void setReplicationFactor(int factor) { 
         this.testServerReplicationFactor = factor;
     }
-    
+
+    public String getCheckMyWritesMode() {
+        return this.testServerCheckMyWritesCons;
+    }
+
+    public void setCheckMyWritesMode(String mode) {
+        this.testServerCheckMyWritesCons = mode;
+    }
+
     public int getTransRetrials() { 
         return this.testTransRetrials;
     }

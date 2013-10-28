@@ -374,8 +374,8 @@ public class MachineManager
     }
     
     public MachineManager() {
-        this.clients = new ArrayList<>();
-        this.tests = new ArrayList<>();
+        this.clients = new ArrayList<Client>();
+        this.tests = new ArrayList<TestParams>();
         this.server = null;
     }
     
@@ -455,7 +455,7 @@ public class MachineManager
         String serverListenHostPort = config.getString("server.listenHostPort");
         String serverFaultTolerant = config.getString("server.faultTolerant");
         String serverRestartAttempts = config.getString("server.restartAttempts");
-        int serverUseZookeeper = config.getInt("server.zookeeper", 0);
+        String serverTxSupport = config.getString("server.tx-support", "default");
         StringTokenizer st = new StringTokenizer(serverListenHostPort, ":");
         if( !serverListenHostPort.contains(":") || st.countTokens() != 2 ) {
             throw new ConfigurationException("Parsing error of server.listenHostPort. "
@@ -477,7 +477,7 @@ public class MachineManager
                         + "Please pass integer value to this parameter.");
         }
         this.server.setRestartAttempts(Integer.valueOf(serverRestartAttempts));        
-        this.server.setUseZookeeper(Integer.valueOf(serverUseZookeeper));     
+        this.server.setTxSupport(serverTxSupport);
         
         
         // get clients program filename 
@@ -586,6 +586,7 @@ public class MachineManager
             tp.setTestWriteCons(testConfig.getString("server.write.consistency", "one" ));
             tp.setTransLockGran(testConfig.getString("server.trans.locking.granularity", "epv"));
             tp.setReplicationFactor(testConfig.getInt("server.replication.factor", 1));
+            tp.setCheckMyWritesMode(testConfig.getString("server.consistency.check_my_writes", "on"));
             
             // client related params
             tp.setTestNum(testConfig.getInt("test.num", 1));
@@ -622,7 +623,7 @@ public class MachineManager
      * @return 
      */
     public ArrayList<SSHClient> createSSHConnectionsToClients() {
-        ArrayList<SSHClient> ssh_clients = new ArrayList<>();
+        ArrayList<SSHClient> ssh_clients = new ArrayList<SSHClient>();
         try {
             /*server_ssh.loadKnownHosts();
             server_ssh.connect(server.getIpAddress(), server.getPort());
@@ -682,17 +683,17 @@ public class MachineManager
      */
     public boolean checkIfAllOrNoneLoopbackAddresses() { 
         boolean all_loopback = true;
-        if( ! Utils.isLoopbackIpAddress(server.getIpAddress()) )
+        if( ! Utils.isLoopbackIpAddress(server.getServerHTTPListenAddress()) )
             all_loopback = false;
-        for(Iterator it=clients.iterator(); it.hasNext(); ) { 
+        for(Iterator it=clients.iterator(); it.hasNext(); ) {
             Client c = (Client)it.next();
-            if( all_loopback && !Utils.isLoopbackIpAddress(c.getIpAddress()) ) {
+            if( all_loopback && ! Utils.isLoopbackIpAddress(c.getIpAddress()) ) {
                 // at least one is not loopback, but the others are loopback
                 return false;
             }
             if( !all_loopback && Utils.isLoopbackIpAddress(c.getIpAddress()) ) {
-                // at least one is loopback, but the others are not 
-                return false; 
+                // at least one is loopback, but the others are not
+                return false;
             }
         }
         return true;
@@ -891,8 +892,14 @@ public class MachineManager
             SSHCommands.downloadRemoteFile(c, Utils.getClientLogRemoteFilename(c),
                     localFilename, sshClients.get(c.getId()+1));
             
-            Runtime.getRuntime().exec(new String[]{"/bin/bash", 
-                "-c", "tail -n1 " + localFilename + " >> " + currentDir+"/"+server.getFullTestName()+"/"+resultFile}).waitFor();
+            /*Runtime.getRuntime().exec(new String[]{"/bin/bash",
+                "-c", "tail -n1 " + localFilename + " >> " + currentDir+"/"+server.getFullTestName()+"/"+resultFile}).waitFor();*/
+            Runtime.getRuntime().exec(new String[]{"/bin/bash",
+                "-c", "cat " + localFilename + " | grep -A1 'No threads' | tail -n1 >> " +
+                currentDir+"/"+server.getFullTestName()+"/"+resultFile}).waitFor();
+            Runtime.getRuntime().exec(new String[]{"/bin/bash",
+                "-c", "cat " + localFilename + " | grep -A1 'total no entities' | tail -n1 >> " +
+                currentDir+"/"+server.getFullTestName()+"/"+resultFile+".vers"}).waitFor();
         }
         testNum++;
     }

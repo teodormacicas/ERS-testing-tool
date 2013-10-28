@@ -174,7 +174,7 @@ public class SSHCommands
             sb.append(" http://");
             
             // if Zookeeper is used, then the transaction is sent to localhost
-            if( server.getUseZookeeper() == 1 )
+            if( server.getTxSupport().equalsIgnoreCase("zookeeper") )
                 sb.append(client.getIpAddress()).append(":")
                         .append(server.getServerHttpPort()).append(" ");
             else 
@@ -205,11 +205,8 @@ public class SSHCommands
             sb.append(client.getDiffE()).append(" ");
             sb.append(client.getDiffPperE()).append(" ");
             sb.append(client.getDiffVperP()).append(" ");
-            if( server.getUseZookeeper() == 1 ) 
-                sb.append("zookeeper ");
-            else 
-                sb.append("default ");    
-            
+            sb.append(server.getTxSupport()).append(" ");
+            sb.append(server.getCheckMyWritesMode()).append(" ");
             if( client.getId() == 0 ) 
                 sb.append("yes ");
             else 
