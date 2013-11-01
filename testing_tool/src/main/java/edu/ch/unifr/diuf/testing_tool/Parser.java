@@ -118,7 +118,7 @@ public class Parser
         ResultValuesVersionsStats values_per_config = new ResultValuesVersionsStats();
         String line;
         int line_counter = 0;
-        int entries_per_config = no_clients * no_runs;
+        int entries_per_config = no_runs;
         BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
         // read line by line
         BufferedReader br = new BufferedReader(new FileReader(inputFile));
