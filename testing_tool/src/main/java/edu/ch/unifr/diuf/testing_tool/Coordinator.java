@@ -213,6 +213,7 @@ public class Coordinator
             Parser p = new Parser(testDir+test.getFinalRestultFilename(), 
                     testDir+"data-for-plot.running", mm.getClientsNum(), test.getTestNum());
             p.parseFileRunningStats();
+
             Parser p_vers = new Parser(testDir+test.getFinalRestultFilename()+".vers",
                     testDir+"data-for-plot.vers", mm.getClientsNum(), test.getTestNum());
             p_vers.parseFileVersionsStats();

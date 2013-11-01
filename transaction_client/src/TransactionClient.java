@@ -1038,8 +1038,11 @@ public class TransactionClient
                 System.out.println("No threads,Total time, total trans, conflicts, aborted, successful rate/sec, no retrials");
                 System.out.println(tc.no_threads + " " + total_time + " " + total_trans + " " + conflicts + " " + aborted + " " +
                         ((double)tc.total_successful/total_time*1000) + " "  + tc.no_retrials);
-                System.out.println("Versions stats: ");
-                System.out.println(tc.getVersionsStats(tc.dest_graph));
+
+                if( args[24] != null && args[24].equals("yes") ) {
+                    System.out.println("Versions stats: ");
+                    System.out.println(tc.getVersionsStats(tc.dest_graph));
+                }
                 
                 if( tc.distr_flag !=null && ! tc.distr_flag.isEmpty() && tc.distr_flag.equals("yes") ) {
                     // as the threads are finished, signal it again with a new empty file
