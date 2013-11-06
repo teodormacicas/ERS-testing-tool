@@ -149,8 +149,7 @@ public class TransactionClient
                         if( insert ) {
                             // change entity id for each operation
                             //++counter_e;
-                            Random r = new Random();
-                            counter_e = r.nextInt(numDiffEnt);
+                            counter_e = random_gen.nextInt(numDiffEnt);
                             if( counter_e >= numDiffEnt ) {
                                counter_e = 0;
                             }
