@@ -147,12 +147,10 @@ public class TransactionClient
                     int carry = 0;
                     if( conflictFlag.equals("yes") ) {
                         if( insert ) {
-                            // change entity id for each operation if many
-                            if( no_op_per_t > 1 ) {
-                                ++counter_e;
-                                if( counter_e >= numDiffEnt ) {
-                                   counter_e = 0;
-                                }
+                            // change entity id for each operation
+                            ++counter_e;
+                            if( counter_e >= numDiffEnt ) {
+                               counter_e = 0;
                             }
                             if( ++counter_v >= numDiffPropPerEnt ) {
                                 counter_v = 0;
