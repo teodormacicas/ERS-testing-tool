@@ -54,10 +54,10 @@ public class TransactionClient
 	private Thread[] client_threads;
 	public int total_successful;
 
-        final public static String SERVER_TRANSACTION_SERVLET="/transaction";
-        final public static String SERVER_HANDLE_GRAPHS_SERVLET="/graph";
-        final public static String SERVER_SETUP_SERVLET="/setup";
-        final public static String SERVER_VERSIONS_STATS="/query_versions_stats";
+        final public static String SERVER_TRANSACTION_SERVLET="/ers/transaction";
+        final public static String SERVER_HANDLE_GRAPHS_SERVLET="/ers/graph";
+        final public static String SERVER_SETUP_SERVLET="/ers/setup";
+        final public static String SERVER_VERSIONS_STATS="/ers/query_versions_stats";
 
         public static final String FILENAME_SUFFIX_READY_WARMUP = "-client-ready-for-warmup";
         public static final String FILENAME_SUFFIX_START_SENDING_REQUESTS = "-start-sending-requests";
@@ -148,7 +148,9 @@ public class TransactionClient
                     if( conflictFlag.equals("yes") ) {
                         if( insert ) {
                             // change entity id for each operation
-                            ++counter_e;
+                            //++counter_e;
+                            Random r = new Random();
+                            counter_e = r.nextInt(numDiffEnt);
                             if( counter_e >= numDiffEnt ) {
                                counter_e = 0;
                             }
