@@ -102,7 +102,7 @@ public class TransactionClient
 
                         this.collect_results = false;
 			this.finished = false; 
-			this.random_gen = new Random();
+			this.random_gen = new Random(thread_id);
 			this.size = input_triples.size();
                         this.total_run_trans = 0;
 			this.successful_trans = 0;
@@ -150,9 +150,9 @@ public class TransactionClient
                             // change entity id for each operation
                             //++counter_e;
                             counter_e = random_gen.nextInt(numDiffEnt);
-                            if( counter_e >= numDiffEnt ) {
+                            /*if( counter_e >= numDiffEnt ) {
                                counter_e = 0;
-                            }
+                            }*/
                             if( ++counter_v >= numDiffPropPerEnt ) {
                                 counter_v = 0;
                                 if( ++counter_p >= numDiffValuePerProp ) {
