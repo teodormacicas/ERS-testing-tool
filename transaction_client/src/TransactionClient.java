@@ -102,7 +102,7 @@ public class TransactionClient
 
                         this.collect_results = false;
 			this.finished = false; 
-			this.random_gen = new Random(thread_id);
+			this.random_gen = new Random(client_dec_id*thread_id);
 			this.size = input_triples.size();
                         this.total_run_trans = 0;
 			this.successful_trans = 0;
