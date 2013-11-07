@@ -174,7 +174,8 @@ public class TransactionClient
                         }
                     }
                     else { 
-                        if( fullEntity ) 
+                        //if( fullEntity  )
+                        if( fullEntity || insert )
                             ++counter_e;
                         else {
                             if( ++counter_v >= numDiffPropPerEnt ) {
