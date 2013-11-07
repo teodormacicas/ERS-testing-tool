@@ -177,26 +177,26 @@ public class TransactionClient
                         if( fullEntity ) 
                             ++counter_e;
                         else {
-                            if( ++counter_v > numDiffPropPerEnt ) {
+                            if( ++counter_v >= numDiffPropPerEnt ) {
                                 counter_v = 0; 
-                                if( ++counter_p > numDiffValuePerProp ) {
+                                if( ++counter_p >= numDiffValuePerProp ) {
                                     counter_p = 0;
                                     counter_e++;
                                 }
                             }
                         }
-                        if( counter_e > numDiffEnt ) { 
+                        if( counter_e >= numDiffEnt ) {
                             counter_e = 0; 
-                            // do not increment carry when sending 'fullEntity' transactions 
+                            /*// do not increment carry when sending 'fullEntity' transactions
                             // by doing so it may send transactions to non-existing records
                             if( !fullEntity )
-                                ++carry;
+                                ++carry;*/
                         }
-                        randomE = client_dec_id + "-" + thread_id + "-" + counter_e + "--" + carry;
+                        randomE = client_dec_id + "-" + thread_id + "-" + counter_e;// + "--" + carry;
                         randomP = client_dec_id + "-" + thread_id + "-" + counter_e
-                                + "-" + counter_p + "--" + carry;
+                                + "-" + counter_p;// + "--" + carry;
                         randomV = client_dec_id + "-" + thread_id + "-" + counter_e
-                                + "-" + counter_p + "-" + counter_v + "--" + carry;
+                                + "-" + counter_p + "-" + counter_v;// + "--" + carry;
                     }
                     n[0] = new Variable("eeeeeeeeeeeeeeeeeeeeee"+randomE);
                     n[1] = new Variable("pppppppppppppppppppppp"+randomP);
