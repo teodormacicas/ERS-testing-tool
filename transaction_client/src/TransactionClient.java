@@ -940,6 +940,12 @@ public class TransactionClient
                         case 8:
                             operation_name = "entity full delete";
                             break;
+                        case 10:
+                            operation_name = "insert without transactional context";
+                            break;
+                        case 20:
+                            operation_name = "read without transactional context";
+                            break;
                         default:
                             operation_name = null;
                             break;
