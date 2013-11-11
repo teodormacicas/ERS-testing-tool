@@ -435,10 +435,6 @@ public class TransactionClient
 			Node[] randomNode = getRandomNode(false, false);
 			String urlParameters = "g="+source_graph+"&e="+randomNode[0].toN3()+
                                 "&p=\""+randomNode[1].toString()+"\"&v=\""+randomNode[2].toString()+"\"";
-
-                        System.out.println("CREATE url line: " + urlParameters);
-
-
 			try {
                                 URL url =  new URL(server_http_address+SERVER_CREATE_SERVLET);
 				this.connection = (HttpURLConnection) url.openConnection();
@@ -453,19 +449,19 @@ public class TransactionClient
 				this.connection.setRequestProperty("Content-Length", "" +
                                         Integer.toString(urlParameters.getBytes().length));
 
-                            System.out.println("CREATE before read!!!");
-
 				DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
 				wr.writeBytes(urlParameters);
 				wr.flush();
                                 wr.close();
 
+                                if( collect_results ) {
+                                    this.successful_trans++;
+                                    this.total_trans++;
+                                }
+
 				String line;
 				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 				line = reader.readLine();
-                                
-                    System.out.println("CREATE read line: " + line);
-				
 				reader.close();
 				this.connection.disconnect();
 			} catch( MalformedURLException ex ) {
