@@ -59,6 +59,9 @@ public class TransactionClient
         final public static String SERVER_SETUP_SERVLET="/ers/setup";
         final public static String SERVER_VERSIONS_STATS="/ers/query_versions_stats";
 
+        final public static String SERVER_CREATE_SERVLET="/ers/create";
+        final public static String SERVER_READ_SERVLET="/ers/query";
+
         public static final String FILENAME_SUFFIX_READY_WARMUP = "-client-ready-for-warmup";
         public static final String FILENAME_SUFFIX_START_SENDING_REQUESTS = "-start-sending-requests";
         public static final String FILENAME_SUFFIX_FINISHED = "-finished";
@@ -426,10 +429,83 @@ public class TransactionClient
 			}
 		}
 
+                private void sendSimpleInsert() {
+			Node[] randomNode = getRandomNode(false, false);
+			String urlParameters = "g="+source_graph+"&e="+randomNode[0].toN3()+
+                                "&p="+randomNode[1].toN3()+"&v="+randomNode[2].toN3();
+			try {
+                                URL url =  new URL(server_http_address+SERVER_CREATE_SERVLET);
+				this.connection = (HttpURLConnection) url.openConnection();
+				this.connection.setDoOutput(true);
+				this.connection.setDoInput(true);
+				this.connection.setInstanceFollowRedirects(false);
+				this.connection.setRequestMethod("POST");
+				this.connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                                this.connection.setRequestProperty("Connection", "Keep-Alive");
+				this.connection.setRequestProperty("charset", "utf-8");
+				this.connection.setUseCaches(false);
+
+				this.connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+				DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
+				wr.writeBytes(urlParameters);
+				wr.flush();
+
+				String line;
+				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+				line = reader.readLine();
+				//System.out.println(line);
+				wr.close();
+				reader.close();
+				this.connection.disconnect();
+			} catch( MalformedURLException ex ) {
+				ex.printStackTrace();
+			} catch( IOException ex ) {
+				ex.printStackTrace();
+			}
+		}
+
+                private void sendSimpleRead() {
+			Node[] randomNode = getRandomNode(false, false);
+			String urlParameters = "g="+source_graph+"&e="+randomNode[0].toN3()+
+                                "&p="+randomNode[1].toN3()+"&v="+randomNode[2].toN3();
+			try {
+                                URL url =  new URL(server_http_address+SERVER_CREATE_SERVLET+"?"+urlParameters);
+				this.connection = (HttpURLConnection) url.openConnection();
+				this.connection.setDoOutput(true);
+				this.connection.setDoInput(true);
+				this.connection.setInstanceFollowRedirects(false);
+				this.connection.setRequestMethod("GET");
+                                this.connection.setRequestProperty("Connection", "Keep-Alive");
+				this.connection.setRequestProperty("charset", "utf-8");
+				this.connection.setUseCaches(false);
+                                int responseCode = connection.getResponseCode();
+				String line;
+				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+				line = reader.readLine();
+				//System.out.println(line);
+				reader.close();
+				this.connection.disconnect();
+			} catch( MalformedURLException ex ) {
+				ex.printStackTrace();
+			} catch( IOException ex ) {
+				ex.printStackTrace();
+			}
+		}
+
 		public void run() { 
 			while( ! this.finished ) {
+                            // simple insert, without TX context !!
+                            if( operation_type == 10 ) {
+                                sendSimpleInsert();
+                            }
+                            // simple read, without TX context !!
+                            else if( operation_type == 20 ) {
+                                sendSimpleRead();
+                            }
+                            else {
 				//send here a transaction to server
 				sendTransaction();
+                            }
 			} 
 		}
 	}
@@ -887,7 +963,7 @@ public class TransactionClient
                                            "11. warm-up period (sec) \n" +
                                            "12. operation type (0:insert, 1:insert_link, 2:update, 3:update_link" +
                                            ", 4:delete, 5:delete_link, 6:entity_shallow_copy, 7:entity_deep_copy," +
-                                           " 8:entity_full_delete) \n" +
+                                           " 8:entity_full_delete; 10:insert-NO-TX; 20:read-NO-TX) \n" +
                                            "13. number of operations to run per transaction \n" +
                                            "14. number of retrials (if transaction conficts)\n" + 
                                            "15. distributed mode flag (yes/no); NOTE: if yes, the following parameters are used\n" +
