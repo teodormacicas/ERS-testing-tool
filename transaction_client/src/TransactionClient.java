@@ -15,6 +15,7 @@ import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.semanticweb.yars.nx.Node;
+import org.semanticweb.yars.nx.Resource;
 import org.semanticweb.yars.nx.Variable;
 
 // this must sent random transactions to the server
@@ -202,7 +203,7 @@ public class TransactionClient
                         randomV = client_dec_id + "-" + thread_id + "-" + counter_e
                                 + "-" + counter_p + "-" + counter_v;// + "--" + carry;
                     }
-                    n[0] = new Variable("eeeeeeeeeeeeeeeeeeeeee"+randomE);
+                    n[0] = new Resource("eeeeeeeeeeeeeeeeeeeeee"+randomE);
                     n[1] = new Variable("pppppppppppppppppppppp"+randomP);
                     n[2] = new Variable("vvvvvvvvvvvvvvvvvvvvvv"+randomV);
                     //return input_triples.get(randomInt); 
