@@ -434,7 +434,7 @@ public class TransactionClient
                 private void sendSimpleInsert() {
 			Node[] randomNode = getRandomNode(false, false);
 			String urlParameters = "g="+source_graph+"&e="+randomNode[0].toN3()+
-                                "&p="+randomNode[1].toN3()+"&v="+randomNode[2].toN3();
+                                "&p=\""+randomNode[1].toString()+"\"&v=\""+randomNode[2].toString()+"\"";
 
                         System.out.println("CREATE url line: " + urlParameters);
 
