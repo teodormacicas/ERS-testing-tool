@@ -398,7 +398,8 @@ public class TransactionClient
 				this.connection.setRequestProperty("charset", "utf-8");
 				this.connection.setUseCaches(false);
 
-				this.connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+				this.connection.setRequestProperty("Content-Length", ""
+                                        + Integer.toString(urlParameters.getBytes().length));
 				DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
 				wr.writeBytes(urlParameters);
 				wr.flush();
@@ -454,7 +455,7 @@ public class TransactionClient
 				String line;
 				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 				line = reader.readLine();
-				//System.out.println(line);
+                    System.out.println(line);
 				wr.close();
 				reader.close();
 				this.connection.disconnect();
@@ -473,7 +474,6 @@ public class TransactionClient
                                 URL url =  new URL(server_http_address+SERVER_READ_SERVLET+"?"+urlParameters);
 				this.connection = (HttpURLConnection) url.openConnection();
 				this.connection.setDoOutput(true);
-				this.connection.setDoInput(true);
 				this.connection.setInstanceFollowRedirects(false);
 				this.connection.setRequestMethod("GET");
                                 this.connection.setRequestProperty("Connection", "Keep-Alive");
