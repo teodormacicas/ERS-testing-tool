@@ -435,6 +435,10 @@ public class TransactionClient
 			Node[] randomNode = getRandomNode(false, false);
 			String urlParameters = "g="+source_graph+"&e="+randomNode[0].toN3()+
                                 "&p="+randomNode[1].toN3()+"&v="+randomNode[2].toN3();
+
+                        System.out.println("CREATE url line: " + urlParameters);
+
+
 			try {
                                 URL url =  new URL(server_http_address+SERVER_CREATE_SERVLET);
 				this.connection = (HttpURLConnection) url.openConnection();
