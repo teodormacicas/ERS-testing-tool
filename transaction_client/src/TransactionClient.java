@@ -445,7 +445,8 @@ public class TransactionClient
 				this.connection.setRequestProperty("charset", "utf-8");
 				this.connection.setUseCaches(false);
 
-				this.connection.setRequestProperty("Content-Length", "" + Integer.toString(urlParameters.getBytes().length));
+				this.connection.setRequestProperty("Content-Length", "" +
+                                        Integer.toString(urlParameters.getBytes().length));
 				DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
 				wr.writeBytes(urlParameters);
 				wr.flush();
@@ -469,7 +470,7 @@ public class TransactionClient
 			String urlParameters = "g="+source_graph+"&e="+randomNode[0].toN3()+
                                 "&p="+randomNode[1].toN3()+"&v="+randomNode[2].toN3();
 			try {
-                                URL url =  new URL(server_http_address+SERVER_CREATE_SERVLET+"?"+urlParameters);
+                                URL url =  new URL(server_http_address+SERVER_READ_SERVLET+"?"+urlParameters);
 				this.connection = (HttpURLConnection) url.openConnection();
 				this.connection.setDoOutput(true);
 				this.connection.setDoInput(true);
