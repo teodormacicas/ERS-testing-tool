@@ -406,6 +406,9 @@ public class TransactionClient
 				wr.flush();
                                 wr.close();
 
+
+                                System.out.println(url.toString());
+
 				String line;
 				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 				line = reader.readLine();
