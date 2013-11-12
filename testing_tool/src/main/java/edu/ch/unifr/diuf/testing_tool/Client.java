@@ -418,7 +418,18 @@ public class Client extends Machine
                     + "Exit code: " + r);
             return -1;
         }
-        this.setPID(SSHCommands.getProgramPID(this, ssh_client));
+        /* KIND OF BAD WORKAROUND .... */
+        int pid = -1;
+        while( true ) {
+            try {
+                pid = SSHCommands.getProgramPID(this, ssh_client);
+                break;
+            } catch( NumberFormatException e ) {
+                Thread.sleep(1000);
+            }
+        }
+        /* END */
+        this.setPID(pid);
         return 0;
     }
     
