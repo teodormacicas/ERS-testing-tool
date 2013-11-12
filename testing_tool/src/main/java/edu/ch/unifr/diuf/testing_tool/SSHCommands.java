@@ -220,7 +220,7 @@ public class SSHCommands
             cmd.join();
             // wait a bit until returning as the client should have enough time to 
             // start and print its PID into the log file (it is checked just after)
-            Thread.sleep(2000);
+            Thread.sleep(3000);
             return cmd.getExitStatus();
         } finally {
             // whatever happens, do not forget to close the session
