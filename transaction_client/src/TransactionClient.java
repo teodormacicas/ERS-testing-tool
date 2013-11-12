@@ -431,6 +431,7 @@ public class TransactionClient
 			}
 		}
 
+                // NO transactional context here!!!
                 private void sendSimpleInsert() {
 			Node[] randomNode = getRandomNode(false, false);
 			String urlParameters = "g="+source_graph+"&e="+randomNode[0].toN3()+
@@ -471,10 +472,11 @@ public class TransactionClient
 			}
 		}
 
+                // NO transactional context here!!!
                 private void sendSimpleRead() {
 			Node[] randomNode = getRandomNode(false, false);
 			String urlParameters = "g="+source_graph+"&e="+randomNode[0].toN3()+
-                                "&p="+randomNode[1].toN3()+"&v="+randomNode[2].toN3();
+                                "&p=\""+randomNode[1].toString()+"\"&v=\""+randomNode[2].toString()+"\"";
 			try {
                                 URL url =  new URL(server_http_address+SERVER_READ_SERVLET+"?"+urlParameters);
 				this.connection = (HttpURLConnection) url.openConnection();
@@ -485,6 +487,12 @@ public class TransactionClient
 				this.connection.setRequestProperty("charset", "utf-8");
 				this.connection.setUseCaches(false);
                                 int responseCode = connection.getResponseCode();
+                                
+                                if( collect_results ) {
+                                    this.successful_trans++;
+                                    this.total_trans++;
+                                }
+
 				String line;
 				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 				line = reader.readLine();
