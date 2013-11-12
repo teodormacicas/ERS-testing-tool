@@ -411,9 +411,9 @@ public class TransactionClient
                                 int responseCode = connection.getResponseCode();
 				//System.out.println(line);
                                 if( collect_results ) {
-                                        if( responseCode == connection.HTTP_ACCEPTED && line.equals("0") )
+                                        if( line.equals("0") )
                                                 successful_trans++;
-                                        else if( responseCode == connection.HTTP_ACCEPTED && line.equals("-1") )
+                                        else if( line.equals("-1") )
                                                 aborted_trans++;
                                         else {
                                                 conflicted_trans += Integer.valueOf(line);
@@ -451,7 +451,7 @@ public class TransactionClient
 				this.connection.setRequestProperty("Content-Length", "" +
                                         Integer.toString(urlParameters.getBytes().length));
 
-				DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
+				DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
 				wr.writeBytes(urlParameters);
 				wr.flush();
                                 wr.close();
@@ -462,8 +462,8 @@ public class TransactionClient
 				reader.close();
 
                                 int responseCode = connection.getResponseCode();
-                                System.out.println(responseCode);
-                                if( responseCode == connection.HTTP_ACCEPTED && collect_results ) {
+                                //System.out.println(responseCode);
+                                if(collect_results ) {
                                     this.successful_trans++;
                                     this.total_trans++;
                                 }
@@ -493,15 +493,16 @@ public class TransactionClient
 				this.connection.setUseCaches(false);
                                 int responseCode = connection.getResponseCode();
                                 
+				String line;
+				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+				line = reader.readLine();
+				//System.out.println(line);
+
                                 if( collect_results ) {
                                     this.successful_trans++;
                                     this.total_trans++;
                                 }
 
-				String line;
-				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-				line = reader.readLine();
-				//System.out.println(line);
 				reader.close();
 				this.connection.disconnect();
 			} catch( MalformedURLException ex ) {
