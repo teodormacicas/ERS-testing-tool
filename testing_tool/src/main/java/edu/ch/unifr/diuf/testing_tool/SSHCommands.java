@@ -217,9 +217,6 @@ public class SSHCommands
             sb.append(" & ");
 
             final Command cmd = session.exec(sb.toString());
-
-            System.out.println(sb.toString());
-
             cmd.join();
             // wait a bit until returning as the client should have enough time to 
             // start and print its PID into the log file (it is checked just after)
@@ -273,6 +270,9 @@ public class SSHCommands
             if ( machine instanceof Client ) 
                 sb.append(Utils.getClientLogRemoteFilename(machine));
             sb.append(" | grep PID | cut -d ' ' -f 2 ");
+
+            System.out.println("GET PID: " + sb.toString());
+
             final Command cmd = session.exec(sb.toString());          
             InputStream is = cmd.getInputStream();
             byte buffer[] = new byte[255];
