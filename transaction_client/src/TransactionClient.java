@@ -456,15 +456,19 @@ public class TransactionClient
 				wr.flush();
                                 wr.close();
 
-                                if( collect_results ) {
-                                    this.successful_trans++;
-                                    this.total_trans++;
-                                }
-
 				String line;
 				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 				line = reader.readLine();
 				reader.close();
+
+                                int responseCode = connection.getResponseCode();
+                                System.out.println(responseCode);
+                                if( responseCode == connection.HTTP_ACCEPTED && collect_results ) {
+                                    this.successful_trans++;
+                                    this.total_trans++;
+                                }
+
+
 				this.connection.disconnect();
 			} catch( MalformedURLException ex ) {
 				ex.printStackTrace();
