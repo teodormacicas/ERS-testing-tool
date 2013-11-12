@@ -217,6 +217,9 @@ public class SSHCommands
             sb.append(" & ");
 
             final Command cmd = session.exec(sb.toString());
+
+            System.out.println(sb.toString());
+
             cmd.join();
             // wait a bit until returning as the client should have enough time to 
             // start and print its PID into the log file (it is checked just after)
