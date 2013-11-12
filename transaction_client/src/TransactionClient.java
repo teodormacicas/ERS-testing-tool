@@ -312,35 +312,35 @@ public class TransactionClient
                                 switch( operation_type ) {
                                         case 0: //insert
                                                 // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
-                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                if( i==0 )// && transactionalSupport.equalsIgnoreCase("mvcc") )
                                                    sb.append("/IP-tx_client");
                                                 sb.append(";");
                                                 sb.append(createAnInsert(0));
                                                 break;
                                         case 1: // insert link
                                                 // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
-                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                if( i==0 ) //&& transactionalSupport.equalsIgnoreCase("mvcc") )
                                                    sb.append("/IL-tx_client");
                                                 sb.append(";");
                                                 sb.append(createAnInsert(1));
                                                 break;
                                         case 2: // update
                                                 // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
-                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                if( i==0 ) //&& transactionalSupport.equalsIgnoreCase("mvcc") )
                                                    sb.append("/UP-tx_client");
                                                 sb.append(";");
                                                 sb.append(createAnUpdate(0));
                                                 break;
                                         case 3: // update link
                                                 // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
-                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                if( i==0 )//&& transactionalSupport.equalsIgnoreCase("mvcc") )
                                                    sb.append("/UL-tx_client");
                                                 sb.append(";");
                                                 sb.append(createAnUpdate(1));
                                                 break;
                                         case 4: // delete
                                                 // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
-                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                if( i==0 )//&& transactionalSupport.equalsIgnoreCase("mvcc") )
                                                    sb.append("/DP-tx_client");
                                                 sb.append(";");
                                                 sb.append(createADelete(0));
@@ -348,28 +348,28 @@ public class TransactionClient
                                         case 5:
                                                 // delete link
                                                 // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
-                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                if( i==0 )//&& transactionalSupport.equalsIgnoreCase("mvcc") )
                                                    sb.append("/DL-tx_client");
                                                 sb.append(";");
                                                 sb.append(createADelete(1));
                                                 break;
                                         case 6: // entity shallow copy
                                                 // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
-                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                if( i==0 )//&& transactionalSupport.equalsIgnoreCase("mvcc") )
                                                    sb.append("/SC-tx_client");
                                                 sb.append(";");
                                                 sb.append(createAnCopyShallow());
                                                 break;
                                         case 7: // entity deep copy
                                                 // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
-                                                if( i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                if( i==0 )//&& transactionalSupport.equalsIgnoreCase("mvcc") )
                                                    sb.append("/DC-tx_client");
                                                 sb.append(";");
                                                 sb.append(createAnCopyDeep());
                                                 break;
                                         case 8: // entity full delete
                                                 // append to BEGIN the type of TX and URN [note: only one type of op are currently supported]
-                                                if(i==0 && transactionalSupport.equalsIgnoreCase("mvcc") )
+                                                if( i==0 )//&& transactionalSupport.equalsIgnoreCase("mvcc") )
                                                    sb.append("/DE-tx_client");
                                                 sb.append(";");
                                                 sb.append(createDeleteEntity());
