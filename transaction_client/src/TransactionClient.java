@@ -398,16 +398,13 @@ public class TransactionClient
                                 this.connection.setRequestProperty("Connection", "Keep-Alive");
 				this.connection.setRequestProperty("charset", "utf-8");
 				this.connection.setUseCaches(false);
-
 				this.connection.setRequestProperty("Content-Length", ""
                                         + Integer.toString(urlParameters.getBytes().length));
+                                
 				DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
 				wr.writeBytes(urlParameters);
 				wr.flush();
                                 wr.close();
-
-
-                                System.out.println(url.toString());
 
 				String line;
 				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
