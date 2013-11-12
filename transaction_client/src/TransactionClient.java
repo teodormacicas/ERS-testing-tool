@@ -408,11 +408,12 @@ public class TransactionClient
 				String line;
 				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 				line = reader.readLine();
+                                int responseCode = connection.getResponseCode();
 				//System.out.println(line);
                                 if( collect_results ) {
-                                        if( line.equals("0") )
+                                        if( responseCode == connection.HTTP_ACCEPTED && line.equals("0") )
                                                 successful_trans++;
-                                        else if( line.equals("-1") )
+                                        else if( responseCode == connection.HTTP_ACCEPTED && line.equals("-1") )
                                                 aborted_trans++;
                                         else {
                                                 conflicted_trans += Integer.valueOf(line);
