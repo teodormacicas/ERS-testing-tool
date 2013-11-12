@@ -404,6 +404,7 @@ public class TransactionClient
 				DataOutputStream wr = new DataOutputStream(connection.getOutputStream ());
 				wr.writeBytes(urlParameters);
 				wr.flush();
+                                wr.close();
 
 				String line;
 				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -422,7 +423,7 @@ public class TransactionClient
                                         }
                                         this.total_trans++;
                                 }
-				wr.close();
+				
 				reader.close();         
 				this.connection.disconnect(); 
 			} catch( MalformedURLException ex ) { 
