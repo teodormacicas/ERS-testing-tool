@@ -1143,7 +1143,8 @@ public class TransactionClient
                 System.out.println(tc.no_threads + " " + total_time + " " + total_trans + " " + conflicts + " " + aborted + " " +
                         ((double)tc.total_successful/total_time*1000) + " "  + tc.no_retrials);
 
-                if( args[24] != null && args[24].equals("yes") ) {
+                if( tc.transactionalSupport.equalsIgnoreCase("mvcc") &&
+                        args[24] != null && args[24].equals("yes") ) {
                     System.out.println("Versions stats: ");
                     System.out.println(tc.getVersionsStats(tc.dest_graph));
                 }
