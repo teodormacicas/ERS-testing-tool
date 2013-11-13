@@ -64,13 +64,14 @@ public class Coordinator
                     + "Please do so before you start once again.");
             System.exit(6);
         }
+        /*
         // are either all or none loopback addresses used?
         if( ! mm.checkIfAllOrNoneLoopbackAddresses() ) { 
             LOGGER.severe("Please either use loopback addresses for all clients "
                     + "and server OR non-loopback for all machines. This will be "
                     + "more probably they can reach other.");
             System.exit(7);
-        } 
+        } */
         
         System.out.println("[INFO] Checking if all clients can ping the server ...");
         try {
