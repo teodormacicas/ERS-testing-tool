@@ -179,7 +179,7 @@ public class TransactionClient
                     }
                     else { 
                         //if( fullEntity  )
-                        if( fullEntity || insert )
+                        if( fullEntity || (insert && transactionalSupport.equalsIgnoreCase("mvcc")) )
                             ++counter_e;
                         else {
                             if( ++counter_v >= numDiffPropPerEnt ) {
