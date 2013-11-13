@@ -152,11 +152,15 @@ public class TransactionClient
                     if( conflictFlag.equals("yes") ) {
                         if( insert ) {
                             // change entity id for each operation
-                            //++counter_e;
-                            counter_e = random_gen.nextInt(numDiffEnt);
-                            /*if( counter_e >= numDiffEnt ) {
-                               counter_e = 0;
-                            }*/
+                            if( transactionalSupport.equalsIgnoreCase("mvcc") ) {
+                                counter_e = random_gen.nextInt(numDiffEnt);
+                            }
+                            else {
+                                ++counter_e;
+                                if( counter_e >= numDiffEnt ) {
+                                   counter_e = 0;
+                                }
+                            }
                             if( ++counter_v >= numDiffPropPerEnt ) {
                                 counter_v = 0;
                                 if( ++counter_p >= numDiffValuePerProp ) {
