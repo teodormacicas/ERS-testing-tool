@@ -1006,6 +1006,9 @@ public class TransactionClient
                         case 20:
                             operation_name = "read without transactional context";
                             break;
+                        case 100:
+                            operation_name = "get zookeeper stats";
+                            break;
                         default:
                             operation_name = null;
                             break;
