@@ -59,6 +59,7 @@ public class TransactionClient
         final public static String SERVER_HANDLE_GRAPHS_SERVLET="/ers/graph";
         final public static String SERVER_SETUP_SERVLET="/ers/setup";
         final public static String SERVER_VERSIONS_STATS="/ers/query_versions_stats";
+        final public static String SERVER_ZOOKEEPER_STATS="/ers/query_zookeeper";
 
         final public static String SERVER_CREATE_SERVLET="/ers/create";
         final public static String SERVER_READ_SERVLET="/ers/query";
@@ -517,7 +518,40 @@ public class TransactionClient
 			}
 		}
 
-		public void run() { 
+                // NO transactional context here!!!
+                private void getZookeeperStats() {
+			String urlParameters = "id="+client_dec_id + "-" + thread_id+"&trials=1000";
+			try {
+                                URL url =  new URL(server_http_address+SERVER_ZOOKEEPER_STATS+"?"+urlParameters);
+				this.connection = (HttpURLConnection) url.openConnection();
+				this.connection.setDoOutput(true);
+				this.connection.setInstanceFollowRedirects(false);
+				this.connection.setRequestMethod("GET");
+                                this.connection.setRequestProperty("Connection", "Keep-Alive");
+				this.connection.setRequestProperty("charset", "utf-8");
+				this.connection.setUseCaches(false);
+                                int responseCode = connection.getResponseCode();
+
+				String line;
+				BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                                while( (line = reader.readLine()) != null ) {
+                                    System.out.println(line);
+                                }
+				reader.close();
+				this.connection.disconnect();
+			} catch( MalformedURLException ex ) {
+				ex.printStackTrace();
+			} catch( IOException ex ) {
+				ex.printStackTrace();
+			}
+		}
+
+		public void run() {
+                        if( operation_type == 100 ) {
+                            getZookeeperStats();
+                            return;
+                        }
+                        
 			while( ! this.finished ) {
                             // simple insert, without TX context !!
                             if( operation_type == 10 ) {
