@@ -1132,31 +1132,42 @@ public class TransactionClient
 		tc.startThreads();
                 long start_time = 0;
                 
-                // wait to warmup before signaling the other threads to go ahead
-                try {
-                        System.out.println("Threads have been started, but wait " + tc.warmup_period
-                                + " seconds to warmup ... ");
-                        for( int i=0; i<tc.warmup_period; ++i ) {
-                            Thread.sleep(1000);
-                            System.out.print("warmup ");
-                        }
-                        // now its time to start collecting data
-                        System.out.println("Signal threads that now they can record statistical data");
-                        tc.startCollectingResults();
-                        start_time = System.currentTimeMillis();
-                        
-                        // now wait the given period for the threads to run transactions before joining them
-                        System.out.println("Leave threads to send transactions for " 
-                                + tc.time_run_per_th + " seconds ... ");
-                        for( int i=0; i<tc.time_run_per_th; i=i+5) {
-                            System.out.print((tc.time_run_per_th-i)+"s ");
-                            if( i+5 > tc.time_run_per_th ) 
-                                Thread.sleep(tc.time_run_per_th-i * 1000);
-                            else
-                                Thread.sleep(5000);
-                        }
-                } catch (InterruptedException ex) {
-                        ex.printStackTrace();
+                // skip this step for Zookeeper stats
+                if( tc.operation_type != 100 ) {
+                    // wait to warmup before signaling the other threads to go ahead
+                    try {
+                            System.out.println("Threads have been started, but wait " + tc.warmup_period
+                                    + " seconds to warmup ... ");
+                            for( int i=0; i<tc.warmup_period; ++i ) {
+                                Thread.sleep(1000);
+                                System.out.print("warmup ");
+                            }
+                            // now its time to start collecting data
+                            System.out.println("Signal threads that now they can record statistical data");
+                            tc.startCollectingResults();
+                            start_time = System.currentTimeMillis();
+
+                            // now wait the given period for the threads to run transactions before joining them
+                            System.out.println("Leave threads to send transactions for "
+                                    + tc.time_run_per_th + " seconds ... ");
+                            for( int i=0; i<tc.time_run_per_th; i=i+5) {
+                                System.out.print((tc.time_run_per_th-i)+"s ");
+                                if( i+5 > tc.time_run_per_th )
+                                    Thread.sleep(tc.time_run_per_th-i * 1000);
+                                else
+                                    Thread.sleep(5000);
+                            }
+                    } catch (InterruptedException ex) {
+                            ex.printStackTrace();
+                    }
+                }
+                // just sleep 10sec
+                else {
+                    try {
+                         Thread.sleep(10000);
+                    } catch (InterruptedException ex) {
+                            ex.printStackTrace();
+                    }
                 }
                 // stop all the trans threads here
                 System.out.println("\nStop threads and gather statistics ");
