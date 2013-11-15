@@ -520,7 +520,7 @@ public class TransactionClient
 
                 // NO transactional context here!!!
                 private void getZookeeperStats() {
-			String urlParameters = "id="+client_dec_id + "-" + thread_id+"&trials=100";
+			String urlParameters = "id="+client_dec_id + "-" + thread_id+"&trials=600";
 			try {
                                 URL url =  new URL(server_http_address+SERVER_ZOOKEEPER_STATS+"?"+urlParameters);
 				this.connection = (HttpURLConnection) url.openConnection();
