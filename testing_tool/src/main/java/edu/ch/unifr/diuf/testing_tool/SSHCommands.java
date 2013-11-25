@@ -177,9 +177,10 @@ public class SSHCommands
             if( server.getTxSupport().equalsIgnoreCase("zookeeper") )
                 sb.append(client.getIpAddress()).append(":")
                         .append(server.getServerHttpPort()).append(" ");
-            else 
-                sb.append(server.getServerHTTPListenAddress()).append(":")
+            else {
+               sb.append(server.getServerHTTPListenAddress()).append(":")
                         .append(server.getServerHttpPort()).append(" ");
+            }
             
             String escapedSourceGraph = server.getSourceGraph().replace("<", "\\<").replace(">", "\\>");
             String escapedDestGraph = server.getDestGraph().replace("<", "\\<").replace(">", "\\>");

@@ -211,13 +211,18 @@ public class Coordinator
                 }
             }
             // one test scenario is done here, parse the output file
+        
+//            System.out.println("FOR TESTING ZOOKEEPER, parsing the output file is canceled!!!");
+    
+
             Parser p = new Parser(testDir+test.getFinalRestultFilename(), 
                     testDir+"data-for-plot.running", mm.getClientsNum(), test.getTestNum());
             p.parseFileRunningStats();
 
             Parser p_vers = new Parser(testDir+test.getFinalRestultFilename()+".vers",
                     testDir+"data-for-plot.vers", mm.getClientsNum(), test.getTestNum());
-            p_vers.parseFileVersionsStats();
+            p_vers.parseFileVersionsStats(); 
+
             try {
                 // make a pause inbetween tests
                 Thread.sleep(2000);
