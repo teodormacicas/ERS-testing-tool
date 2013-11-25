@@ -1,5 +1,8 @@
 package edu.ch.unifr.diuf.testing_tool;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author Teodor Macicas
@@ -7,8 +10,10 @@ package edu.ch.unifr.diuf.testing_tool;
 public class Server extends Machine
 {    
      // this is also used by the clients to know where to connect to
-     private String serverListenIp;
-     private int serverPort;
+     //private String serverListenIp;
+     private List<String> serverListenIp;
+     private List<Integer> serverPort;
+     
      private String serverReadCons; 
      private String serverWriteCons; 
      private String serverTransLockGran; 
@@ -31,8 +36,8 @@ public class Server extends Machine
      private String testName;
     
      public Server() {
-        this.serverListenIp = "0.0.0.0";
-        this.serverPort = 8088;
+        this.serverListenIp = new ArrayList<String>();//"0.0.0.0";
+        this.serverPort = new ArrayList<Integer>(); //8088;
      }
      
      public Server(String ipAddress, int port, String sshUsername) 
@@ -41,8 +46,8 @@ public class Server extends Machine
         this.setIpAddress(ipAddress);
         this.setPort(port);
         this.setSSHUsername(sshUsername);
-        this.serverListenIp = "0.0.0.0";
-        this.serverPort = 8088;
+        this.serverListenIp = new ArrayList<String>(); //"0.0.0.0";
+        this.serverPort = new ArrayList<Integer>(); // 8088;
      }
      
      /**
@@ -53,18 +58,23 @@ public class Server extends Machine
      public void setServerHTTPListenAddress(String ipAddress) 
              throws WrongIpAddressException { 
          if( Utils.validateIpAddress(ipAddress) )
-               this.serverListenIp = ipAddress;
+               //this.serverListenIp = ipAddress;
+               this.serverListenIp.add(ipAddress);
         else
             throw new WrongIpAddressException(ipAddress + " server listen IP address"
                     + " cannot be set due to validation errors");
      }
-     
+
+     public int getServerNoAddresses() {
+         return this.serverListenIp.size();
+     }
+
      /**
       * 
       * @return 
       */
-     public String getServerHTTPListenAddress() { 
-         return this.serverListenIp;
+     public String getServerHTTPListenAddress(int i) {
+         return this.serverListenIp.get(i);
      }
      
      /**
@@ -76,15 +86,15 @@ public class Server extends Machine
         if( ! Utils.validateRemotePort(httpPort) )
             throw new WrongPortNumberException("Server http port number is "
                     + "not valid.");
-        this.serverPort = httpPort;
+        this.serverPort.add(httpPort);
     }
      
     /**
      * 
      * @return 
      */
-    public int getServerHttpPort() { 
-        return this.serverPort;
+    public int getServerHttpPort(int i) {
+        return this.serverPort.get(i);
     }
     
     /**

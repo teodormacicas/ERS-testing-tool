@@ -452,19 +452,30 @@ public class MachineManager
             FileNotFoundException, UnwritableWorkingDirectoryException, TransportException, IOException { 
         
         Configuration config = new PropertiesConfiguration(Utils.PROPERTIES_FILENAME);
-        String serverListenHostPort = config.getString("server.listenHostPort");
+        List serverListenHostPort = config.getList("server.listenHostPort");
         String serverFaultTolerant = config.getString("server.faultTolerant");
         String serverRestartAttempts = config.getString("server.restartAttempts");
         String serverTxSupport = config.getString("server.tx-support", "default");
-        StringTokenizer st = new StringTokenizer(serverListenHostPort, ":");
+        /*StringTokenizer st = new StringTokenizer(serverListenHostPort, ":");
         if( !serverListenHostPort.contains(":") || st.countTokens() != 2 ) {
             throw new ConfigurationException("Parsing error of server.listenHostPort. "
                     + "Please pass data using the pattern IP:PORT. " 
                     + serverListenHostPort);
-        } 
+        } */
         this.server = new Server();
-        this.server.setServerHTTPListenAddress(st.nextToken());
-        this.server.setServerHttpPort(Integer.valueOf(st.nextToken()));
+
+        StringTokenizer st;
+        for(Iterator it=serverListenHostPort.iterator(); it.hasNext(); ) {
+            String server_listen_host = (String)it.next();
+            st = new StringTokenizer(server_listen_host, ":");
+            if( !serverListenHostPort.contains(":") || st.countTokens() != 2 ) {
+                throw new ConfigurationException("Parsing error of server.listenHostPort. "
+                    + "Please pass data using the pattern IP:PORT. "
+                    + server_listen_host);
+            }
+            this.server.setServerHTTPListenAddress(st.nextToken());
+            this.server.setServerHttpPort(Integer.valueOf(st.nextToken()));
+        }
         this.server.setFaultTolerant(serverFaultTolerant.trim());
         try {
             int no_rest = Integer.valueOf(serverRestartAttempts);
@@ -545,7 +556,8 @@ public class MachineManager
                 c = new Client(st.nextToken(), 22, clientSSHUsername, counter);
             }
             // set server info 
-            c.setServerInfo(server.getServerHTTPListenAddress() , server.getServerHttpPort());
+            c.setServerInfo(server.getServerHTTPListenAddress(counter),
+                    server.getServerHttpPort(counter));
             c.setRestartConditionPropThreadsDead(clients_rest_cond);
             c.setTimeoutSec(clients_timeout_s);
             c.setWorkingDirectory(clientsWorkingDir);
@@ -683,7 +695,7 @@ public class MachineManager
      */
     public boolean checkIfAllOrNoneLoopbackAddresses() { 
         boolean all_loopback = true;
-        if( ! Utils.isLoopbackIpAddress(server.getServerHTTPListenAddress()) )
+        if( ! Utils.isLoopbackIpAddress(server.getServerHTTPListenAddress(0)) )
             all_loopback = false;
         for(Iterator it=clients.iterator(); it.hasNext(); ) {
             Client c = (Client)it.next();
@@ -766,9 +778,11 @@ public class MachineManager
      * @throws IOException 
      */
     public void startAllClients() throws TransportException, IOException, InterruptedException {
-        for(Iterator it=clients.iterator(); it.hasNext(); ) { 
+        int counter = -1;
+        for(Iterator it=clients.iterator(); it.hasNext(); ) {
+            ++counter;
             Client c = (Client)it.next();
-            c.runClientRemotely(this.server, sshClients.get(c.getId()+1));
+            c.runClientRemotely(this.server, sshClients.get(c.getId()+1), counter);
         }
     }    
     
@@ -998,9 +1012,12 @@ public class MachineManager
     public String printMachines() { 
         StringBuilder sb = new StringBuilder();
         sb.append("\nServer: "); 
-        sb.append("\n\t http server info: "); 
-        sb.append(server.getServerHTTPListenAddress()).append(":");
-        sb.append(server.getServerHttpPort());
+        sb.append("\n\t http server info: ");
+        for( int i=0; i<server.getServerNoAddresses(); ++i ) {
+            sb.append(server.getServerHTTPListenAddress(i)).append(":");
+            sb.append(server.getServerHttpPort(i));
+            sb.append(",");
+        }
         sb.append("\n\t fault tolerance: "); 
         sb.append(server.getFaultTolerant()).append(" ");
         sb.append(server.getRestartAttempts()).append("retrials ");

@@ -410,9 +410,9 @@ public class Client extends Machine
      * @throws TransportException
      * @throws IOException 
      */
-    public int runClientRemotely(Server server, SSHClient ssh_client)
+    public int runClientRemotely(Server server, SSHClient ssh_client, int i)
             throws TransportException, IOException, InterruptedException {
-        int r = SSHCommands.startClientProgram(this, server, ssh_client);
+        int r = SSHCommands.startClientProgram(this, server, ssh_client, i);
         if( r != 0 ) { 
             System.out.println("[ERROR] Client could not be properly started! "
                     + "Exit code: " + r);

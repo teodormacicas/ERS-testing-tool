@@ -164,7 +164,7 @@ public class SSHCommands
     
 //TODO: add read cons, .... as params 
     
-    public static int startClientProgram(Client client, Server server, SSHClient ssh) 
+    public static int startClientProgram(Client client, Server server, SSHClient ssh, int i)
             throws TransportException, IOException, InterruptedException {
         final Session session = ssh.startSession();
         try {
@@ -176,10 +176,10 @@ public class SSHCommands
             // if Zookeeper is used, then the transaction is sent to localhost
             if( server.getTxSupport().equalsIgnoreCase("zookeeper") )
                 sb.append(client.getIpAddress()).append(":")
-                        .append(server.getServerHttpPort()).append(" ");
+                        .append(server.getServerHttpPort(i)).append(" ");
             else {
-               sb.append(server.getServerHTTPListenAddress()).append(":")
-                        .append(server.getServerHttpPort()).append(" ");
+               sb.append(server.getServerHTTPListenAddress(i)).append(":")
+                        .append(server.getServerHttpPort(i)).append(" ");
             }
             
             String escapedSourceGraph = server.getSourceGraph().replace("<", "\\<").replace(">", "\\>");
