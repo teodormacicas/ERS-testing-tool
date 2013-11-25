@@ -7,6 +7,7 @@ import net.schmizz.sshj.connection.channel.direct.Session.Command;
 import java.io.IOException;
 import java.io.InputStream;
 
+import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.transport.TransportException;
 
 /** This examples demonstrates how a remote command can be executed. */
@@ -144,7 +145,7 @@ public class SSHCommands
         try {
             // run just a dummy command
             final Command cmd = session.exec("ping -c 2 " + machine.getServerIpAddress());
-            //System.out.println(IOUtils.readFully(cmd.getInputStream()).toString());
+            System.out.println(IOUtils.readFully(cmd.getInputStream()).toString());
             cmd.join();
             return cmd.getExitStatus();
         } finally {
