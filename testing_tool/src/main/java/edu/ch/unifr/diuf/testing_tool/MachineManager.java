@@ -468,7 +468,7 @@ public class MachineManager
         for(Iterator it=serverListenHostPort.iterator(); it.hasNext(); ) {
             String server_listen_host = (String)it.next();
             st = new StringTokenizer(server_listen_host, ":");
-            if( !serverListenHostPort.contains(":") || st.countTokens() != 2 ) {
+            if( !server_listen_host.contains(":") || st.countTokens() != 2 ) {
                 throw new ConfigurationException("Parsing error of server.listenHostPort. "
                     + "Please pass data using the pattern IP:PORT. "
                     + server_listen_host);
