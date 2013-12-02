@@ -622,7 +622,8 @@ public class TransactionClient
             
             // reset the graph if needed (only for insert)
             if( (reset_flag == 1 || reset_flag == 2) && 
-                (operation_type == 0 || operation_type == 10) ) {
+                (operation_type == 0 || operation_type == 10 || 
+                  (operation_type == 2 && transactionalSupport.equalsIgnoreCase("mvcc"))) )  {
                     System.out.println("Truncate the graph " + source_graph);
                     deleteGraph(source_graph, false);
                     if( transactionalSupport.equalsIgnoreCase("mvcc") ) {
