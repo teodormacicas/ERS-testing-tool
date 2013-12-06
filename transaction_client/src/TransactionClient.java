@@ -608,7 +608,7 @@ public class TransactionClient
 		}*/
 	}
 	
-        public void dbinit() throws InterruptedException {
+        public void dbinit(boolean init_db) throws InterruptedException {
             // change consistency
             changeReadWriteConsistency(read_cons, write_cons);
             // change transaction locking granularity 
@@ -619,25 +619,28 @@ public class TransactionClient
             changeTransactionalSupport(transactionalSupport);
             // change check-my-writes cons mode (valid only for MVCC)
             changeCheckMyWritesMode(check_my_writes);
-            
-            // reset the graph if needed (only for insert)
-            if( (reset_flag == 1 || reset_flag == 2) && 
-                (operation_type == 0 || operation_type == 10 || 
-                  (operation_type == 2 && transactionalSupport.equalsIgnoreCase("mvcc"))) )  {
-                    System.out.println("Truncate the graph " + source_graph);
-                    deleteGraph(source_graph, false);
-                    if( transactionalSupport.equalsIgnoreCase("mvcc") ) {
-                        // truncate the ERS_versions keyspace also
-                        deleteGraph("<ERS_versions>", false);
-                    }
+
+            // does this client initialize/setup the DB?
+            if( init_db ) {
+                // reset the graph if needed (only for insert)
+                if( (reset_flag == 1 || reset_flag == 2) &&
+                    (operation_type == 0 || operation_type == 10 ||
+                      (operation_type == 2 && transactionalSupport.equalsIgnoreCase("mvcc"))) )  {
+                        System.out.println("Truncate the graph " + source_graph);
+                        deleteGraph(source_graph, false);
+                        if( transactionalSupport.equalsIgnoreCase("mvcc") ) {
+                            // truncate the ERS_versions keyspace also
+                            deleteGraph("<ERS_versions>", false);
+                        }
+                }
+                System.out.println("Create the source graph " + source_graph);
+                createNewGraph(source_graph);
+
+                // truncate and create the destination
+                deleteGraph(dest_graph, false);
+                System.out.println("Create the dest graph " + dest_graph);
+                createNewGraph(dest_graph);
             }
-            System.out.println("Create the source graph " + source_graph); 
-            createNewGraph(source_graph);
-            
-            // truncate and create the destination
-            deleteGraph(dest_graph, false);
-            System.out.println("Create the dest graph " + dest_graph); 
-            createNewGraph(dest_graph); 
         }
         
         public void dbclear() { 
@@ -1110,7 +1113,10 @@ public class TransactionClient
                 tc.init();
                 // does this client initialize/setup the DB?
                 if( args[24] != null && args[24].equals("yes") ) {
-                    tc.dbinit();
+                    tc.dbinit(true);
+                }
+                else {
+                    tc.dbinit(false);
                 }
 
                 if( tc.distr_flag !=null && ! tc.distr_flag.isEmpty() && tc.distr_flag.equals("yes") ) {
